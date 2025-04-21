@@ -4,7 +4,7 @@ Project for 2025 Software Engineering Basis
 # Structure
 
 ```bash
-my-vue-project/
+./
 ├── public/          # 静态资源
 ├── src/
 │   ├── assets/      # 图片/样式
