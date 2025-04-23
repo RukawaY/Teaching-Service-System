@@ -1,0 +1,3 @@
+<template>
+  Search Course
+</template>

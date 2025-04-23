@@ -1,0 +1,3 @@
+<template>
+    Choose Course
+</template>
