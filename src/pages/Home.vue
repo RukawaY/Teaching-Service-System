@@ -71,31 +71,31 @@ const router = useRouter();
 const is_homepage = inject('is_homepage');
 
 function goToChooseCurriculum() {
-  is_homepage.value = false;
+  is_homepage.set(false);
   router.push('/chooseCurriculum');
 }
 function goToShowCurriculum() {
-  is_homepage.value = false;
+  is_homepage.set(false);
   router.push('/showCurriculum');
 }
 function goToSearchCourse() {
-  is_homepage.value = false;
+  is_homepage.set(false);
   router.push('/searchCourse');
 }
 function goToChooseCourse() {
-  is_homepage.value = false;
+  is_homepage.set(false);
   router.push('/chooseCourse');
 }
 function goToShowResult() {
-  is_homepage.value = false;
+  is_homepage.set(false);
   router.push('/showResult');
 }
 function goToShowResultTeacher() {
-  is_homepage.value = false;
+  is_homepage.set(false);
   router.push('/showResultTeacher');
 }
 function goToManage() {
-  is_homepage.value = false;
+  is_homepage.set(false);
   router.push('/manage');
 }
 </script>

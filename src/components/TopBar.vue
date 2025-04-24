@@ -2,9 +2,9 @@
   <div class="top-bar">
     <!-- 左侧Logo/标题 -->
     <div class="left-section">
-      <el-icon size="30px" v-if="!is_homepage" @click="goToHome()" class="back-icon"><Back /></el-icon>
+      <el-icon size="30px" v-if="!is_homepage.get()" @click="goToHome()" class="back-icon"><Back /></el-icon>
       <span class="system-name">{{ pageTitle }}</span>
-      <span class="system-subname" v-if="is_homepage">课程选择子系统</span>
+      <span class="system-subname" v-if="is_homepage.get()">课程选择子系统</span>
     </div>
 
     <!-- 右侧用户信息 -->
@@ -59,12 +59,12 @@ const handleCommand = async (command) => {
 }
 
 function goToHome() {
-  is_homepage.value = true;
+  is_homepage.set(true);
   router.push('/home')
 }
 
 const pageTitle = computed(() => {
-  if (is_homepage.value) {
+  if (is_homepage.get()) {
     return '教学服务系统'
   } else {
     // 返回对应页面的标题
