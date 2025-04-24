@@ -1,3 +1,5 @@
 <template>
-  Search Course
+  <div>
+    Search Course
+  </div>
 </template>

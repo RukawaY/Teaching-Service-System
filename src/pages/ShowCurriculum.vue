@@ -1,5 +1,5 @@
 <template>
     <div>
-        Choose Course
+        Show Curriculum
     </div>
 </template>

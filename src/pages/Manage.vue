@@ -1,3 +1,5 @@
 <template>
-  Manage
+  <div>
+    Manage
+  </div>
 </template>

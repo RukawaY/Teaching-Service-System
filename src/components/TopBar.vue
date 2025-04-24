@@ -2,8 +2,9 @@
   <div class="top-bar">
     <!-- 左侧Logo/标题 -->
     <div class="left-section">
-      <el-icon size="30px" style="margin-right: 15px;"><Expand /></el-icon>
-      <span class="system-name">教学服务系统</span>
+      <el-icon size="30px" v-if="!is_homepage" @click="goToHome()" class="back-icon"><Back /></el-icon>
+      <span class="system-name">{{ pageTitle }}</span>
+      <span class="system-subname" v-if="is_homepage">课程选择子系统</span>
     </div>
 
     <!-- 右侧用户信息 -->
@@ -32,10 +33,10 @@
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowDown } from '@element-plus/icons-vue'
-import { inject } from 'vue'
+import { inject, computed } from 'vue'
 
 const router = useRouter()
-
+const is_homepage = inject('is_homepage')
 const userName = inject('user_name')
 const userAvatar = inject('user_avatar')
 
@@ -56,6 +57,35 @@ const handleCommand = async (command) => {
     // TODO: 个人中心
   }
 }
+
+function goToHome() {
+  is_homepage.value = true;
+  router.push('/home')
+}
+
+const pageTitle = computed(() => {
+  if (is_homepage.value) {
+    return '教学服务系统'
+  } else {
+    // 返回对应页面的标题
+    switch (router.currentRoute.value.path) {
+      case '/chooseCurriculum':
+        return '定制培养方案'
+      case '/showCurriculum':
+        return '查看培养方案'
+      case '/searchCourse':
+        return '搜索课程信息'
+      case '/chooseCourse':
+        return '选择课程'
+      case '/showResult':
+        return '查看选课结果'
+      case '/showResultTeacher':
+        return '查看选课结果（教师端）'
+      case '/manage':
+        return '课程选择管理'
+    }
+  }
+})
 </script>
 
 <style scoped>
@@ -86,6 +116,13 @@ const handleCommand = async (command) => {
   margin-left: 10px;
 }
 
+.system-subname {
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  margin-left: 20px;
+}
+
 .right-section {
   display: flex;
   align-items: center;
@@ -113,5 +150,15 @@ const handleCommand = async (command) => {
 .el-icon {
   font-size: 12px;
   color: white;
+}
+
+.back-icon {
+  cursor: pointer;
+  margin-right: 15px;
+}
+
+.back-icon:hover {
+  opacity: 0.5;
+  transition: all 0.2s;
 }
 </style>

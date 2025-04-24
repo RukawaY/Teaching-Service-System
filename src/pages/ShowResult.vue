@@ -1,3 +1,5 @@
 <template>
-    Show Result
+    <div>
+        Show Result
+    </div>
 </template>
