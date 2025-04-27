@@ -58,6 +58,22 @@
       </div>
     </el-button>
     
+    <el-button class="cardBox" @click="goToManualChoose()" v-if="user == 'admin'">
+      <div>
+        <div style="font-size: 28px;font-weight: bold;">手动选择课程</div>
+        <el-divider />
+        <el-icon size="150px" color="#info"><SetUp /></el-icon>
+      </div>
+    </el-button>
+
+    <el-button class="cardBox" @click="goToSetCurriculum()" v-if="user == 'admin'">
+      <div>
+        <div style="font-size: 28px;font-weight: bold;">制订培养方案</div>
+        <el-divider />
+        <el-icon size="150px" color="#409EFF"><List /></el-icon>
+      </div>
+    </el-button>
+
   </div>
 </template>
 
@@ -97,6 +113,14 @@ function goToShowResultTeacher() {
 function goToManage() {
   is_homepage.set(false);
   router.push('/manage');
+}
+function goToManualChoose() {
+  is_homepage.set(false);
+  router.push('/manualChoose');
+}
+function goToSetCurriculum() {
+  is_homepage.set(false);
+  router.push('/setCurriculum');
 }
 </script>
 

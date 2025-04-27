@@ -83,6 +83,10 @@ const pageTitle = computed(() => {
         return '查看选课结果（教师端）'
       case '/manage':
         return '课程选择管理'
+      case '/manualChoose':
+        return '手动选择课程'
+      case '/setCurriculum':
+        return '制订培养方案'
     }
   }
 })
