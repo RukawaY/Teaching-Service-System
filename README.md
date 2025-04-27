@@ -34,3 +34,5 @@ npm run dev
 # Element Plus Website
 
 https://element-plus.org/zh-CN/component/overview.html
+
+**如果要区分管理员、教师、学生，在./src/App.vue中修改user的值为admin、teacher、student**
