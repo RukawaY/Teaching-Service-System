@@ -64,7 +64,7 @@
 <script setup>
 import { ref, computed, reactive } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { getMajorCurriculum, setPersonalCurriculum } from '../api/student.ts';
+import { getMajorCurriculum, setPersonalCurriculum } from '../../api/student';
 
 const formData = reactive({
   studentId: '',

@@ -28,9 +28,17 @@
 
     <el-button class="cardBox" @click="goToChooseCourse()" v-if="user == 'student'">
       <div>
-        <div style="font-size: 28px;font-weight: bold;">选择课程</div>
+        <div style="font-size: 28px;font-weight: bold;">课程初选</div>
         <el-divider />
         <el-icon size="150px" color="#67C23A"><Calendar /></el-icon>
+      </div>
+    </el-button>
+
+    <el-button class="cardBox" @click="goToChooseCourseSupp()" v-if="user == 'student'">
+      <div>
+        <div style="font-size: 28px;font-weight: bold;">课程补选</div>
+        <el-divider />
+        <el-icon size="150px" color="pink"><Collection /></el-icon>
       </div>
     </el-button>
 
@@ -121,6 +129,10 @@ function goToManualChoose() {
 function goToSetCurriculum() {
   is_homepage.set(false);
   router.push('/setCurriculum');
+}
+function goToChooseCourseSupp() {
+  is_homepage.set(false);
+  router.push('/chooseCourseSupplementary');
 }
 </script>
 
