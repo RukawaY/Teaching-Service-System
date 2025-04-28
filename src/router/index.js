@@ -9,6 +9,7 @@ import ShowResultTeacher from '../pages/teacher/ShowResultTeacher.vue'
 import Manage from '../pages/admin/Manage.vue'
 import ManualChoose from '../pages/admin/ManualChoose.vue'
 import SetCurriculum from '../pages/admin/SetCurriculum.vue'
+import ManageSupp from '../pages/admin/ManageSupp.vue'
 import Home from '../pages/Home.vue'
 import Login from '../pages/Login.vue'
 
@@ -28,6 +29,7 @@ const router = createRouter({
         { path: '/manage', component: Manage },
         { path: '/manualChoose', component: ManualChoose },
         { path: '/setCurriculum', component: SetCurriculum },
+        { path: '/manageSupplementary', component: ManageSupp },
     ]
 })
 

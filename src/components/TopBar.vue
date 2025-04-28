@@ -89,6 +89,8 @@ const pageTitle = computed(() => {
         return '制订培养方案'
       case '/chooseCourseSupplementary':
         return '课程补选'
+      case '/manageSupplementary':
+        return '课程补选管理'
     }
   }
 })

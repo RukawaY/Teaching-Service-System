@@ -82,11 +82,18 @@
       </div>
     </el-button>
 
+    <el-button class="cardBox" @click="goToManageSupp()" v-if="user == 'admin'">
+      <div>
+        <div style="font-size: 28px;font-weight: bold;">课程补选管理</div>
+        <el-divider />
+        <el-icon size="150px" color="#E6A23C"><EditPen /></el-icon>
+      </div>
+    </el-button>
+    
   </div>
 </template>
 
 <script setup>
-import { InfoFilled } from '@element-plus/icons-vue';
 import { inject } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -133,6 +140,10 @@ function goToSetCurriculum() {
 function goToChooseCourseSupp() {
   is_homepage.set(false);
   router.push('/chooseCourseSupplementary');
+}
+function goToManageSupp() {
+  is_homepage.set(false);
+  router.push('/manageSupplementary');
 }
 </script>
 
