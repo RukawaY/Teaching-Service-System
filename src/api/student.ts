@@ -104,11 +104,11 @@ const handleError = (error: unknown) => {
     }
 }
 
-export const getMajorCurriculum = async (major_id: Number): Promise<majorCurriculumQueryResponse> => {
+export const getMajorCurriculum = async (major_name: String): Promise<majorCurriculumQueryResponse> => {
     try {
         const response = await api.get(`/api/student/get_curriculum`, {
             params: {
-                major_id: major_id
+                major_name: major_name
             }
         });
         return response.data;
