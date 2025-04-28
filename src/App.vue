@@ -4,7 +4,7 @@ import { ref, provide, onMounted } from 'vue';
 import TopBar from './components/TopBar.vue'
 import BottomBar from './components/BottomBar.vue'
 
-const user = ref('admin');
+const user = ref('student');
 const user_name = ref('用户名');
 const user_avatar = ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png');
 const is_homepage = ref(true);

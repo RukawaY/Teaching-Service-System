@@ -89,10 +89,24 @@ interface courseQueryResponse {
     }
 }
 
-interface setPersonalCurriculumInfoResponse {
+interface postResponse {
     code: String;
     message: String;
 }
+
+interface supplementaryCourseQuery {
+    student_id: Number;
+    course_id: Number;
+}
+
+interface getSuppResultResponse {
+    code: String;
+    message: String;
+    data: {
+        result: String;
+    }
+}
+
 
 const handleError = (error: unknown) => {
     if (axios.isAxiosError(error)) {
@@ -119,7 +133,7 @@ export const getMajorCurriculum = async (major_name: String): Promise<majorCurri
 }
 
 
-export const setPersonalCurriculum = async (params: personalCurriculumInfo): Promise<setPersonalCurriculumInfoResponse> => {
+export const setPersonalCurriculum = async (params: personalCurriculumInfo): Promise<postResponse> => {
     try {
         const response = await api.post(`/api/student/set_personal_curriculum`, params);
         return response.data;
@@ -155,9 +169,33 @@ export const searchCourse = async (params: courseQuery): Promise<courseQueryResp
     }
 }
 
+export const chooseCourseSupp = async (params: supplementaryCourseQuery): Promise<postResponse> => {
+    try {
+        const response = await api.post(`/api/student/apply_supplement`, params);
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+}
+
+export const getSuppResult = async (params: supplementaryCourseQuery): Promise<getSuppResultResponse> => {
+    try {
+        const response = await api.get(`/api/student/get_supp_result`, {
+            params: params
+        });
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+}
+
 export const studentAPI = {
     getMajorCurriculum,
     setPersonalCurriculum,
     getPersonalCurriculum,
-    searchCourse
+    searchCourse,
+    chooseCourseSupp,
+    getSuppResult
 }
