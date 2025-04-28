@@ -2,6 +2,7 @@
 import { RouterView } from 'vue-router'
 import { ref, provide, onMounted } from 'vue';
 import TopBar from './components/TopBar.vue'
+import BottomBar from './components/BottomBar.vue'
 
 const user = ref('student');
 const user_name = ref('用户名');
@@ -33,10 +34,10 @@ provide('is_homepage', {
 </script>
 
 <template>
-  <TopBar />
-  <!-- 渲染当前路由的组件 -->
-  <RouterView style="margin-top: 80px;"/>
+  <div>
+    <TopBar />
+    <!-- 渲染当前路由的组件 -->
+    <RouterView style="margin-top: 80px; padding-bottom: 70px;"/>
+    <BottomBar />
+  </div>
 </template>
-
-<style scoped>
-</style>
