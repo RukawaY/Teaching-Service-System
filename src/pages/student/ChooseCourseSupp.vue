@@ -39,9 +39,9 @@
         <el-table-column prop="class_time" label="上课时间" />
         <el-table-column prop="classroom" label="上课地点" />
         <el-table-column prop="credit" label="学分数" />
-        <el-table-column prop="status" label="补选状态" width="120">
+        <el-table-column prop="result" label="补选状态" width="120">
           <template #default="scope">
-            <el-tag :type="getStatusType(scope.row.status)">{{ scope.row.status }}</el-tag>
+            <el-tag :type="getStatusType(scope.row.result)">{{ scope.row.result }}</el-tag>
           </template>
         </el-table-column>
       </el-table>
@@ -75,7 +75,7 @@ const applications = ref([
     class_time: '1-2节',
     classroom: 'A101',
     credit: 2,
-    status: '待审核'
+    result: '待审核'
 },
 {
     student_id: 1,
@@ -85,7 +85,7 @@ const applications = ref([
     class_time: '3-4节',
     classroom: 'B202',
     credit: 2,
-    status: '补选成功'
+    result: '补选成功'
 },
 {
     student_id: 1,
@@ -95,7 +95,7 @@ const applications = ref([
     class_time: '5-6节',
     classroom: 'C303',
     credit: 2,
-    status: '补选失败'
+    result: '补选失败'
 }
 ]);
 
@@ -107,6 +107,7 @@ const submitApplication = async () => {
   }
 
   let course_info;
+  submitting.value = true;
 
   // 先检查课程是否存在
   try {
@@ -116,17 +117,17 @@ const submitApplication = async () => {
 
     if (course_info.code != '200') {
       ElMessage.error(course_info.message || '获取课程信息失败');
+      submitting.value = false;
       return;
     }
   } catch (error) {
     ElMessage.error('获取课程信息失败');
     console.error(error);
+    submitting.value = false;
     return;
   }
 
   try {
-    submitting.value = true;
-    
     const params = {
       student_id: formData.student_id,
       course_id: formData.course_id
@@ -146,7 +147,7 @@ const submitApplication = async () => {
         class_time: course_info.data.class_time,
         classroom: course_info.data.classroom,
         credit: course_info.data.credit,
-        status: '待审核'
+        result: '待审核'
       });
       
     } else {
@@ -169,28 +170,22 @@ const refreshApplications = async () => {
 
   try {
     refreshing.value = true;
+    const response = await getSuppResult(formData.student_id);
     
-    // 获取每个申请的状态
-    for (let i = 0; i < applications.value.length; i++) {
-      const app = applications.value[i];
-      
-      const params = {
-        student_id: app.student_id,
-        course_id: app.course_id
-      };
-      
-      const response = await getSuppResult(params);
-      
-      if (response.code === '200') {
-        // 更新状态
-        applications.value[i] = {
-          ...app,
-          status: response.data.result || '待审核'
-        };
+    if (response.code === '200') {
+      // 遍历applications.value，根据response.data.result_list中的course_id，更新applications.value中的result
+      for (let i = 0; i < applications.value.length; i++) {
+        const app = applications.value[i];
+        const result = response.data.result_list.find(item => item.course_id === app.course_id);
+        if (result) {
+          applications.value[i].result = result.result;
+        }
       }
+
+      ElMessage.success('刷新补选状态成功');
+    } else {
+      ElMessage.error(response.message || '刷新补选状态失败');
     }
-    
-    ElMessage.success('刷新补选状态成功');
   } catch (error) {
     ElMessage.error('刷新补选状态失败');
     console.error(error);

@@ -100,11 +100,16 @@ interface supplementaryCourseQuery {
     course_id: Number;
 }
 
+interface suppResult {
+    course_id: Number;
+    result: String;
+}
+
 interface getSuppResultResponse {
     code: String;
     message: String;
     data: {
-        result: String;
+        result_list: Array<suppResult>;
     }
 }
 
@@ -180,10 +185,12 @@ export const chooseCourseSupp = async (params: supplementaryCourseQuery): Promis
     }
 }
 
-export const getSuppResult = async (params: supplementaryCourseQuery): Promise<getSuppResultResponse> => {
+export const getSuppResult = async (student_id: Number): Promise<getSuppResultResponse> => {
     try {
         const response = await api.get(`/api/student/get_supp_result`, {
-            params: params
+            params: {
+                student_id: student_id
+            }
         });
         return response.data;
     } catch (error) {
