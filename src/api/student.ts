@@ -67,6 +67,7 @@ interface courseQuery {
     teacher_name?: String;
     course_id?: Number;
     student_id?: Number; // 可选，如果为空是在searchCourse中调用，表示返回所有课程，否则在chooseCourse中调用，表示只能查看自己专业的课程
+    need_available?: Boolean;
 }
 
 interface detailedCourseInfo {
@@ -120,7 +121,7 @@ const handleError = (error: unknown) => {
 
 export const getMajorCurriculum = async (major_name: String): Promise<majorCurriculumQueryResponse> => {
     try {
-        const response = await api.get(`/api/student/get_curriculum`, {
+        const response = await api.get(`/api/get_curriculum`, {
             params: {
                 major_name: major_name
             }
@@ -159,7 +160,7 @@ export const getPersonalCurriculum = async (student_id: Number): Promise<student
 
 export const searchCourse = async (params: courseQuery): Promise<courseQueryResponse> => {
     try {
-        const response = await api.get(`/api/student/search_course`, {
+        const response = await api.get(`/api/search_course`, {
             params: params
         });
         return response.data;
