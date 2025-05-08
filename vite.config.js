@@ -13,6 +13,6 @@ export default defineConfig({
       },
     },
     // front end port
-    port: 5431
+    port: 3000,
   },
 })

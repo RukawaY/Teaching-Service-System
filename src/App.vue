@@ -4,10 +4,12 @@ import { ref, provide, onMounted } from 'vue';
 import TopBar from './components/TopBar.vue'
 import BottomBar from './components/BottomBar.vue'
 
-const user = ref('student');
-const user_name = ref('用户名');
+const user = ref('admin'); // 用户角色，可能的值为'student', 'teacher', 'admin'
+const user_name = ref('宋嘉民');
 const user_avatar = ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png');
-const is_homepage = ref(true);
+const is_homepage = ref(true); // 首页状态，true表示在首页，false表示不在首页
+// ref 是Vue 3中用于创建响应式数据的API,它返回一个包含.value属性的对象，
+// 该属性用于访问和修改响应式数据的值, get和set方法用于访问和修改值
 
 // 从localStorage读取保存的状态
 onMounted(() => {
