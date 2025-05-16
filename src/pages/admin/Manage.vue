@@ -49,13 +49,7 @@
 
     <el-table-column prop="modify" label="修改操作">
       <template #default="scope">
-        <!-- 
-          按钮组件：用于切换行的编辑状态
-          type="primary" 设置为主要样式(蓝色)
-          @click 事件处理器：切换当前行的isEditing状态
-          按钮文本根据编辑状态动态显示"保存"或"编辑"
-        -->
-        <el-button type="primary" size="medium" @click="scope.row.isEditing = !scope.row.isEditing">
+        <el-button type="primary" size="medium" @click="handleRowAction(scope.row)">
           {{ scope.row.isEditing ? '保存' : '编辑' }}
         </el-button>
       </template>
@@ -66,14 +60,14 @@
 
 <script setup>
 // 从Vue导入ref函数，用于创建响应式数据
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import { getTimeSettings, updateTimeSettings } from '../../api/admin'
 
-/**
- * 格式化时间函数
- * @param {Date} time - 需要格式化的日期对象
- * @return {String} 格式化后的时间字符串
- * 使用toLocaleString方法将日期转换为中国标准格式，不使用12小时制
- */
+// 添加加载状态
+const loading = ref(false)
+
+
 function timeFormat(time) {
   return time.toLocaleString('zh-CN', { hour12: false })
 }
@@ -85,15 +79,139 @@ function timeFormat(time) {
  * - name: 操作名称
  * - value: 操作值(可以是数字或日期)
  * - isEditing: 标记当前行是否处于编辑状态，初始为false
+ * - key: API数据映射键
  */
 const tableData = ref([
-  { name: '控制在线选课人数', value: 100, isEditing: false },
-  { name: '初选开始时间', value: new Date('2025-04-24 10:00:00'), isEditing: false },
-  { name: '初选结束时间', value: new Date('2025-04-24 10:00:00'), isEditing: false },
-  { name: '补选开始时间', value: new Date('2025-04-24 10:00:00'), isEditing: false },
-  { name: '补选结束时间', value: new Date('2025-04-24 10:00:00'), isEditing: false },
-
+  { name: '控制在线选课人数', value: 100, isEditing: false, key: 'max_number' },
+  { name: '初选开始时间', value: new Date('2025-04-24 10:00:00'), isEditing: false, key: 'first_start' },
+  { name: '初选结束时间', value: new Date('2025-04-24 10:00:00'), isEditing: false, key: 'first_end' },
+  { name: '补选开始时间', value: new Date('2025-04-24 10:00:00'), isEditing: false, key: 'second_start' },
+  { name: '补选结束时间', value: new Date('2025-04-24 10:00:00'), isEditing: false, key: 'second_end' },
 ])
+
+/**
+ * 行动作处理函数
+ * 当点击编辑/保存按钮时处理行数据的变更
+ * @param {Object} row 当前操作的行数据
+ */
+const handleRowAction = async (row) => {
+  // 如果当前是编辑状态，点击保存
+  if (row.isEditing) {
+    try {
+      // 准备API请求数据
+      const requestData = {
+        max_number: 100,
+        first_time_list: [],
+        second_time_list: [],
+        drop_time_list: []
+      };
+
+      // 根据当前行类型设置对应的请求数据
+      if (row.key === 'max_number') {
+        requestData.max_number = Number(row.value);
+      } else {
+        // 获取所有时间相关的行
+        const firstStartRow = tableData.value.find(r => r.key === 'first_start');
+        const firstEndRow = tableData.value.find(r => r.key === 'first_end');
+        const secondStartRow = tableData.value.find(r => r.key === 'second_start');
+        const secondEndRow = tableData.value.find(r => r.key === 'second_end');
+        
+        // 设置初选时间
+        requestData.first_time_list = [
+          firstStartRow?.value instanceof Date ? firstStartRow.value.toISOString() : new Date().toISOString(),
+          firstEndRow?.value instanceof Date ? firstEndRow.value.toISOString() : new Date().toISOString()
+        ];
+        
+        // 设置补选时间
+        requestData.second_time_list = [
+          secondStartRow?.value instanceof Date ? secondStartRow.value.toISOString() : new Date().toISOString(),
+          secondEndRow?.value instanceof Date ? secondEndRow.value.toISOString() : new Date().toISOString()
+        ];
+      }
+      
+      // 调用API保存设置
+      const response = await updateTimeSettings(requestData);
+      
+      if (response.code === '200') {
+        ElMessage.success(`"${row.name}"已成功更新`);
+      } else {
+        ElMessage.error(response.message || '更新失败');
+        // 保持编辑状态
+        return;
+      }
+    } catch (error) {
+      console.error('保存设置出错:', error);
+      ElMessage.error('保存设置失败');
+      
+      // 保持编辑状态
+      return;
+    }
+  }
+  
+  // 切换编辑状态
+  row.isEditing = !row.isEditing;
+}
+
+/**
+ * 获取系统时间设置
+ * 页面加载时从服务器获取当前设置
+ */
+const fetchTimeSettings = async () => {
+  try {
+    loading.value = true;
+    const response = await getTimeSettings();
+    
+    if (response.code === '200') {
+      // 更新在线选课人数
+      const maxNumberRow = tableData.value.find(row => row.key === 'max_number');
+      if (maxNumberRow) {
+        maxNumberRow.value = Number(response.data.max_number);
+      }
+      
+      // 更新初选开始/结束时间
+      if (response.data.first_time_list && response.data.first_time_list.length >= 2) {
+        const firstStartRow = tableData.value.find(row => row.key === 'first_start');
+        const firstEndRow = tableData.value.find(row => row.key === 'first_end');
+        
+        if (firstStartRow) {
+          firstStartRow.value = new Date(response.data.first_time_list[0]);
+        }
+        
+        if (firstEndRow) {
+          firstEndRow.value = new Date(response.data.first_time_list[1]);
+        }
+      }
+      
+      // 更新补选开始/结束时间
+      if (response.data.second_time_list && response.data.second_time_list.length >= 2) {
+        const secondStartRow = tableData.value.find(row => row.key === 'second_start');
+        const secondEndRow = tableData.value.find(row => row.key === 'second_end');
+        
+        if (secondStartRow) {
+          secondStartRow.value = new Date(response.data.second_time_list[0]);
+        }
+        
+        if (secondEndRow) {
+          secondEndRow.value = new Date(response.data.second_time_list[1]);
+        }
+      }
+      
+      ElMessage.success('成功加载系统设置');
+    } else {
+      ElMessage.warning(response.message || '获取系统设置失败');
+    }
+  } catch (error) {
+    console.error('获取系统设置出错:', error);
+    ElMessage.error('获取系统设置失败');
+  } finally {
+    loading.value = false;
+  }
+}
+
+// 组件挂载时自动获取设置
+onMounted(() => {
+  fetchTimeSettings();
+})
 
 /**
  * El-Table 组件基本语法和用法说明:
