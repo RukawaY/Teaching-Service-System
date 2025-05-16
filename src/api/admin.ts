@@ -78,6 +78,38 @@ interface StudentCoursesResponse {
     }
 }
 
+// 补选申请相关接口类型
+interface SuppApplication {
+    supplement_id: number;
+    student_id: number;
+    student_name: string;
+    course_id: number;
+    course_name: string;
+    result: boolean | null;
+}
+
+interface GetSuppApplicationsRequest {
+    course_id?: number;
+}
+
+interface GetSuppApplicationsResponse {
+    code: string;
+    message: string;
+    data: {
+        supplement_list: SuppApplication[];
+    }
+}
+
+interface ProcessSuppRequest {
+    supplement_id: number;
+    result: boolean;
+}
+
+interface ProcessSuppResponse {
+    code: string;
+    message: string;
+}
+
 // 处理错误的通用函数
 const handleError = (error: unknown) => {
     if (axios.isAxiosError(error)) {
@@ -114,7 +146,7 @@ export const updateTimeSettings = async (params: UpdateTimeSettingsRequest): Pro
 
 */
 
-// 原始函数替换为 mock 版本
+// !!原始函数替换为 mock 版本
 export function updateTimeSettings(data) {
   // 返回一个 Promise，模拟成功的 API 响应
   return Promise.resolve({
@@ -124,6 +156,7 @@ export function updateTimeSettings(data) {
   });
 }
 
+// !!!以下是 mock 版本的 getTimeSettings 函数
 export function getTimeSettings() {
   // 返回模拟的时间设置数据
   return Promise.resolve({
@@ -144,7 +177,7 @@ export function getTimeSettings() {
   });
 }
 
-// 以下是 mock 版本的 getStudentCourses 函数
+// !!!以下是 mock 版本的 getStudentCourses 函数
 export function getStudentCourses(studentId) {
   console.log('Using mock getStudentCourses for student ID:', studentId);
   
@@ -168,7 +201,7 @@ export function getStudentCourses(studentId) {
   });
 }
 
-// 以下是 mock 版本的 adminChooseCourseForStudent 函数
+// !!!!!!!以下是 mock 版本的 adminChooseCourseForStudent 函数
 export function adminChooseCourseForStudent(params) {
   console.log('Using mock adminChooseCourseForStudent with params:', params);
   
@@ -179,10 +212,79 @@ export function adminChooseCourseForStudent(params) {
   });
 }
 
+// !!!mock版本的获取补选申请列表函数
+export function getSuppApplications(params) {
+  console.log('Using mock getSuppApplications with params:', params);
+  
+  // 构造模拟数据
+  const mockApplications = [
+    {
+      supplement_id: 1,
+      student_id: 1001,
+      student_name: '张三',
+      course_id: 101,
+      course_name: '高等数学',
+      result: null
+    },
+    {
+      supplement_id: 2,
+      student_id: 1002,
+      student_name: '李四',
+      course_id: 102,
+      course_name: '线性代数',
+      result: true
+    },
+    {
+      supplement_id: 3,
+      student_id: 1003,
+      student_name: '王五',
+      course_id: 103,
+      course_name: '计算机网络',
+      result: false
+    },
+    {
+      supplement_id: 4,
+      student_id: 1001,
+      student_name: '张三',
+      course_id: 104,
+      course_name: '数据结构',
+      result: null
+    }
+  ];
+  
+  // 过滤数据（根据nage course_id）
+  let filteredApplications = mockApplications;
+  
+  if (params && params.course_id) {
+    filteredApplications = filteredApplications.filter(app => app.course_id === params.course_id);
+  }
+  
+  return Promise.resolve({
+    code: '200',
+    message: 'Success',
+    data: {
+      supplement_list: filteredApplications
+    }
+  });
+}
+
+// !!!mock版本的处理补选申请函数
+export function processSupplementary(params) {
+  console.log('Using mock processSupplementary with params:', params);
+  
+  // 始终返回成功响应
+  return Promise.resolve({
+    code: '200',
+    message: '处理成功'
+  });
+}
+
 // 管理员端API
 export const adminAPI = {
     getTimeSettings,
     updateTimeSettings,
     getStudentCourses,
-    adminChooseCourseForStudent
+    adminChooseCourseForStudent,
+    getSuppApplications,
+    processSupplementary
 };
