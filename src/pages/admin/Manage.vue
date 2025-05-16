@@ -28,12 +28,8 @@
           v-model 双向绑定当前行的value属性
           type="datetime" 设置为日期时间选择器
         -->
-        <el-date-picker
-          v-model="scope.row.value"
-          type="datetime"
-          placeholder="选择日期与时间"
-          v-if="scope.row.isEditing && scope.row.name != '控制在线选课人数'"
-        />
+        <el-date-picker v-model="scope.row.value" type="datetime" placeholder="选择日期与时间"
+          v-if="scope.row.isEditing && scope.row.name != '控制在线选课人数'" />
         <!-- 
           条件渲染：当行处于编辑状态且是"控制在线选课人数"行时显示输入框
           size="medium" 设置输入框大小为中等
@@ -54,7 +50,7 @@
         </el-button>
       </template>
     </el-table-column>
-    
+
   </el-table>
 </template>
 
@@ -115,23 +111,23 @@ const handleRowAction = async (row) => {
         const firstEndRow = tableData.value.find(r => r.key === 'first_end');
         const secondStartRow = tableData.value.find(r => r.key === 'second_start');
         const secondEndRow = tableData.value.find(r => r.key === 'second_end');
-        
+
         // 设置初选时间
         requestData.first_time_list = [
           firstStartRow?.value instanceof Date ? firstStartRow.value.toISOString() : new Date().toISOString(),
           firstEndRow?.value instanceof Date ? firstEndRow.value.toISOString() : new Date().toISOString()
         ];
-        
+
         // 设置补选时间
         requestData.second_time_list = [
           secondStartRow?.value instanceof Date ? secondStartRow.value.toISOString() : new Date().toISOString(),
           secondEndRow?.value instanceof Date ? secondEndRow.value.toISOString() : new Date().toISOString()
         ];
       }
-      
+
       // 调用API保存设置
       const response = await updateTimeSettings(requestData);
-      
+
       if (response.code === '200') {
         ElMessage.success(`"${row.name}"已成功更新`);
       } else {
@@ -142,12 +138,12 @@ const handleRowAction = async (row) => {
     } catch (error) {
       console.error('保存设置出错:', error);
       ElMessage.error('保存设置失败');
-      
+
       // 保持编辑状态
       return;
     }
   }
-  
+
   // 切换编辑状态
   row.isEditing = !row.isEditing;
 }
@@ -160,42 +156,42 @@ const fetchTimeSettings = async () => {
   try {
     loading.value = true;
     const response = await getTimeSettings();
-    
+
     if (response.code === '200') {
       // 更新在线选课人数
       const maxNumberRow = tableData.value.find(row => row.key === 'max_number');
       if (maxNumberRow) {
         maxNumberRow.value = Number(response.data.max_number);
       }
-      
+
       // 更新初选开始/结束时间
       if (response.data.first_time_list && response.data.first_time_list.length >= 2) {
         const firstStartRow = tableData.value.find(row => row.key === 'first_start');
         const firstEndRow = tableData.value.find(row => row.key === 'first_end');
-        
+
         if (firstStartRow) {
           firstStartRow.value = new Date(response.data.first_time_list[0]);
         }
-        
+
         if (firstEndRow) {
           firstEndRow.value = new Date(response.data.first_time_list[1]);
         }
       }
-      
+
       // 更新补选开始/结束时间
       if (response.data.second_time_list && response.data.second_time_list.length >= 2) {
         const secondStartRow = tableData.value.find(row => row.key === 'second_start');
         const secondEndRow = tableData.value.find(row => row.key === 'second_end');
-        
+
         if (secondStartRow) {
           secondStartRow.value = new Date(response.data.second_time_list[0]);
         }
-        
+
         if (secondEndRow) {
           secondEndRow.value = new Date(response.data.second_time_list[1]);
         }
       }
-      
+
       ElMessage.success('成功加载系统设置');
     } else {
       ElMessage.warning(response.message || '获取系统设置失败');

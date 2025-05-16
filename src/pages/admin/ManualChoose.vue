@@ -7,7 +7,7 @@
           <p>为学生手动添加课程</p>
         </div>
       </template>
-      
+
       <el-form :model="formData" label-width="120px" class="input-form">
         <el-form-item label="学生ID">
           <el-input v-model.number="formData.studentId" placeholder="请输入学生ID" type="number" />
@@ -54,12 +54,8 @@
           <el-table-column prop="classroom" label="上课教室" />
           <el-table-column label="操作" width="100">
             <template #default="scope">
-              <el-button 
-                type="primary" 
-                size="small" 
-                @click="chooseCourse(scope.row)"
-                :disabled="isTimeConflict(scope.row)"
-              >
+              <el-button type="primary" size="small" @click="chooseCourse(scope.row)"
+                :disabled="isTimeConflict(scope.row)">
                 选课
               </el-button>
             </template>
@@ -92,7 +88,7 @@ const courseLoading = ref(false);
 
 // 检查时间冲突
 const isTimeConflict = (course) => {
-  return selectedCourses.value.some(selected => 
+  return selectedCourses.value.some(selected =>
     selected.class_time === course.class_time
   );
 };
@@ -103,26 +99,26 @@ const searchStudentCourses = async () => {
     ElMessage.warning('请输入学生ID');
     return;
   }
-  
+
   try {
     loading.value = true;
-    
+
     // 调用API获取学生信息和已选课程
     const response = await getStudentCourses(formData.studentId);
-    
+
     if (response.code === '200') {
       // 设置学生信息
       studentInfo.value = {
         id: formData.studentId,
         name: response.data.student_name,
       };
-      
+
       // 设置已选课程
       selectedCourses.value = response.data.course_list;
-      
+
       // 获取可选课程
       await fetchAvailableCourses();
-      
+
       ElMessage.success('获取学生信息成功');
     } else {
       ElMessage.error(response.message || '获取学生信息失败');
@@ -140,10 +136,10 @@ const searchStudentCourses = async () => {
 // 获取可选课程
 const fetchAvailableCourses = async () => {
   if (!studentInfo.value) return;
-  
+
   try {
     courseLoading.value = true;
-    
+
     // 使用 searchCourse API 获取可选课程列表
     const response = await searchCourseMock({
       need_available: true
@@ -151,7 +147,7 @@ const fetchAvailableCourses = async () => {
     // const response = await searchCourse({
     //   need_available: true
     // });
-    
+
     if (response.code === '200') {
       // 过滤掉学生已选的课程
       const selectedIds = selectedCourses.value.map(c => c.course_id);
@@ -175,41 +171,41 @@ const chooseCourse = async (course) => {
     ElMessage.warning('请先查询学生信息');
     return;
   }
-  
+
   // 检查时间冲突
   if (isTimeConflict(course)) {
     ElMessage.error('该课程与已选课程时间冲突');
     return;
   }
-  
+
   try {
     // 显示确认对话框
     await ElMessageBox.confirm(
-      `确定为学生(ID: ${formData.studentId})选择课程: ${course.course_name}?`, 
-      '确认选课', 
+      `确定为学生(ID: ${formData.studentId})选择课程: ${course.course_name}?`,
+      '确认选课',
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }
     );
-    
+
     // 调用API进行选课操作
     const response = await adminChooseCourseForStudent({
       student_id: formData.studentId,
       course_id: course.course_id
     });
-    
+
     if (response.code === '200') {
       // 将课程添加到已选列表
       selectedCourses.value.push(course);
-      
+
       // 从可选列表中移除
       const index = availableCourses.value.findIndex(c => c.course_id === course.course_id);
       if (index !== -1) {
         availableCourses.value.splice(index, 1);
       }
-      
+
       ElMessage.success(`已为学生选择课程: ${course.course_name}`);
     } else {
       ElMessage.error(response.message || '选课失败');
@@ -267,7 +263,8 @@ const chooseCourse = async (course) => {
   margin: 0 auto;
 }
 
-.student-card, .available-courses-card {
+.student-card,
+.available-courses-card {
   width: 100%;
 }
 </style>

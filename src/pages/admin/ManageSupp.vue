@@ -7,7 +7,7 @@
           <p>处理学生提交的课程补选申请</p>
         </div>
       </template>
-      
+
       <el-form :model="formData" label-width="120px" class="input-form">
         <el-form-item label="课程ID">
           <el-input v-model.number="formData.courseId" placeholder="请输入课程ID(选填)" type="number" />
@@ -47,36 +47,22 @@
         <el-table-column label="操作" width="200">
           <template #default="scope">
             <div class="action-buttons">
-              <el-button
-                type="success"
-                size="small"
-                @click="handleApprove(scope.row)"
-                :disabled="scope.row.result !== null"
-              >
+              <el-button type="success" size="small" @click="handleApprove(scope.row)"
+                :disabled="scope.row.result !== null">
                 通过
               </el-button>
-              <el-button
-                type="danger"
-                size="small"
-                @click="handleReject(scope.row)"
-                :disabled="scope.row.result !== null"
-              >
+              <el-button type="danger" size="small" @click="handleReject(scope.row)"
+                :disabled="scope.row.result !== null">
                 拒绝
               </el-button>
             </div>
           </template>
         </el-table-column>
       </el-table>
-      
+
       <div class="pagination-container">
-        <el-pagination
-          background
-          layout="prev, pager, next"
-          :total="totalApplications"
-          :page-size="pageSize"
-          :current-page="currentPage"
-          @current-change="handlePageChange"
-        />
+        <el-pagination background layout="prev, pager, next" :total="totalApplications" :page-size="pageSize"
+          :current-page="currentPage" @current-change="handlePageChange" />
       </div>
     </el-card>
 
@@ -107,17 +93,17 @@ const showEmpty = computed(() => !loading.value && applications.value.length ===
 const fetchSupplementaryApplications = async () => {
   try {
     loading.value = true;
-    
+
     // 构造查询参数
     const params = {};
     if (formData.courseId) params.course_id = formData.courseId;
-    
+
     const response = await getSuppApplications(params);
-    
+
     if (response.code === '200') {
       applications.value = response.data.supplement_list;
       totalApplications.value = applications.value.length;
-      
+
       if (applications.value.length > 0) {
         ElMessage.success(`共找到 ${applications.value.length} 条补选申请`);
       } else {
@@ -158,19 +144,19 @@ const handleApprove = async (application) => {
         type: 'success'
       }
     );
-    
+
     const response = await processSupplementary({
       supplement_id: application.supplement_id,
       result: true
     });
-    
+
     if (response.code === '200') {
       // 更新本地数据
       const index = applications.value.findIndex(item => item.supplement_id === application.supplement_id);
       if (index !== -1) {
         applications.value[index].result = true;
       }
-      
+
       ElMessage.success('已通过该补选申请');
     } else {
       ElMessage.error(response.message || '操作失败');
@@ -194,19 +180,19 @@ const handleReject = async (application) => {
         type: 'warning'
       }
     );
-    
+
     const response = await processSupplementary({
       supplement_id: application.supplement_id,
       result: false
     });
-    
+
     if (response.code === '200') {
       // 更新本地数据
       const index = applications.value.findIndex(item => item.supplement_id === application.supplement_id);
       if (index !== -1) {
         applications.value[index].result = false;
       }
-      
+
       ElMessage.success('已拒绝该补选申请');
     } else {
       ElMessage.error(response.message || '操作失败');
@@ -235,7 +221,8 @@ onMounted(fetchSupplementaryApplications);
   gap: 20px;
 }
 
-.form-card, .applications-card {
+.form-card,
+.applications-card {
   width: 95%;
   margin: 0px auto 20px auto;
 }

@@ -8,14 +8,10 @@
           <p>为专业设置或编辑培养方案</p>
         </div>
       </template>
-      
+
       <el-form :model="formData" label-width="120px" class="input-form" :rules="rules" ref="formRef">
         <el-form-item label="专业名称" prop="major_name" required>
-          <el-input 
-            v-model="formData.major_name" 
-            placeholder="请输入专业名称"
-            style="width: 100%;"
-          />
+          <el-input v-model="formData.major_name" placeholder="请输入专业名称" style="width: 100%;" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="queryCurriculum" :loading="loading">
@@ -39,36 +35,22 @@
 
         <div v-for="(section, index) in formData.sections" :key="index" class="section-item">
           <el-divider v-if="index > 0" />
-          
+
           <div class="section-header">
-            <el-input
-              v-model="section.section_name"
-              placeholder="模块名称（如：必修课、选修课）"
-              style="width: 200px; margin-right: 20px;"
-            />
-            <el-input-number
-              v-model="section.section_credit"
-              :min="0"
-              controls-position="right"
-              placeholder="模块学分要求"
-              style="width: 180px;"
-            >
+            <el-input v-model="section.section_name" placeholder="模块名称（如：必修课、选修课）"
+              style="width: 200px; margin-right: 20px;" />
+            <el-input-number v-model="section.section_credit" :min="0" controls-position="right" placeholder="模块学分要求"
+              style="width: 180px;">
               <template #prepend>要求学分:</template>
             </el-input-number>
-            
+
             <div class="credit-status">
-              <span :class="{'credit-warning': !isSectionCreditEnough(section)}">
+              <span :class="{ 'credit-warning': !isSectionCreditEnough(section) }">
                 当前学分: {{ calculateSectionCredit(section) }}
               </span>
             </div>
-            
-            <el-button
-              type="danger"
-              @click="removeSection(index)"
-              icon="Delete"
-              circle
-              style="margin-left: 10px;"
-            />
+
+            <el-button type="danger" @click="removeSection(index)" icon="Delete" circle style="margin-left: 10px;" />
           </div>
 
           <div class="section-courses" v-if="section.course_list.length > 0">
@@ -77,11 +59,7 @@
               <el-table-column prop="credit" label="学分" width="120" />
               <el-table-column label="操作" width="120" align="center">
                 <template #default="scope">
-                  <el-button
-                    type="danger"
-                    size="small"
-                    @click="removeCourseFromSection(section, scope.$index)"
-                  >
+                  <el-button type="danger" size="small" @click="removeCourseFromSection(section, scope.$index)">
                     移除
                   </el-button>
                 </template>
@@ -112,11 +90,7 @@
           <el-table-column prop="sectionName" label="所属模块" width="120" />
           <el-table-column label="操作" width="120" align="center">
             <template #default="scope">
-              <el-button 
-                type="danger" 
-                size="small" 
-                @click="removeCourseFromCurriculum(scope.row)"
-              >
+              <el-button type="danger" size="small" @click="removeCourseFromCurriculum(scope.row)">
                 移除
               </el-button>
             </template>
@@ -131,13 +105,8 @@
           <div class="card-header">
             <h3>可添加课程</h3>
             <div class="search-form">
-              <el-input 
-                v-model="searchKeyword" 
-                placeholder="输入课程名称或ID搜索" 
-                style="width: 300px; margin-right: 10px;"
-                clearable
-                @keyup.enter="filterAvailableCourses"
-              />
+              <el-input v-model="searchKeyword" placeholder="输入课程名称或ID搜索" style="width: 300px; margin-right: 10px;"
+                clearable @keyup.enter="filterAvailableCourses" />
               <el-button type="primary" @click="filterAvailableCourses">
                 筛选课程
               </el-button>
@@ -152,11 +121,7 @@
           <el-table-column prop="teacher_name" label="授课教师" width="120" />
           <el-table-column label="操作" width="120" align="center">
             <template #default="scope">
-              <el-button 
-                type="primary" 
-                size="small" 
-                @click="showAddCourseDialog(scope.row)"
-              >
+              <el-button type="primary" size="small" @click="showAddCourseDialog(scope.row)">
                 添加
               </el-button>
             </template>
@@ -165,34 +130,19 @@
         <el-empty v-if="filteredAvailableCourses.length === 0" description="暂无可添加课程" />
 
         <div class="pagination-container" v-if="filteredAvailableCourses.length > 0">
-          <el-pagination
-            background
-            layout="prev, pager, next"
-            :total="totalAvailableCourses"
-            :page-size="pageSize"
-            :current-page="currentPage"
-            @current-change="handlePageChange"
-          />
+          <el-pagination background layout="prev, pager, next" :total="totalAvailableCourses" :page-size="pageSize"
+            :current-page="currentPage" @current-change="handlePageChange" />
         </div>
       </el-card>
     </div>
 
     <!-- 添加课程到模块对话框 -->
-    <el-dialog
-      v-model="showSelectSectionDialog"
-      title="选择添加到模块"
-      width="30%"
-    >
+    <el-dialog v-model="showSelectSectionDialog" title="选择添加到模块" width="30%">
       <el-form>
         <el-form-item label="选择模块">
           <el-select v-model="selectedSectionForCourse" placeholder="请选择模块" style="width: 100%">
-            <el-option
-              v-for="section in formData.sections"
-              :key="section.section_name"
-              :label="section.section_name"
-              :value="section.section_name"
-              :disabled="!section.section_name"
-            />
+            <el-option v-for="section in formData.sections" :key="section.section_name" :label="section.section_name"
+              :value="section.section_name" :disabled="!section.section_name" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -250,7 +200,7 @@ const formData = reactive({
 // 计算属性: 已添加到培养方案的课程
 const addedCourses = computed(() => {
   const courses = [];
-  
+
   formData.sections.forEach(section => {
     section.course_list.forEach(course => {
       // 查找完整课程信息
@@ -263,7 +213,7 @@ const addedCourses = computed(() => {
       }
     });
   });
-  
+
   return courses;
 });
 
@@ -271,7 +221,7 @@ const addedCourses = computed(() => {
 const availableCourses = computed(() => {
   // 获取已添加课程的ID列表
   const addedCourseIds = addedCourses.value.map(course => course.course_id);
-  
+
   // 过滤出未添加的课程
   return allCourses.value.filter(course => !addedCourseIds.includes(course.course_id));
 });
@@ -281,10 +231,10 @@ const filteredAvailableCourses = computed(() => {
   if (!searchKeyword.value) {
     return availableCourses.value;
   }
-  
+
   const keyword = searchKeyword.value.toLowerCase();
-  return availableCourses.value.filter(course => 
-    course.course_name.toLowerCase().includes(keyword) || 
+  return availableCourses.value.filter(course =>
+    course.course_name.toLowerCase().includes(keyword) ||
     course.course_id.toString().includes(keyword)
   );
 });
@@ -298,31 +248,31 @@ const queryCurriculum = async () => {
     ElMessage.warning('请先输入专业名称');
     return;
   }
-  
+
   try {
     loading.value = true;
-    
+
     // 获取专业培养方案
     const curriculumResponse = await adminAPI.getCurriculum(formData.major_name);
-    
+
     // 获取所有课程列表，使用真实API而不是mock
     const coursesResponse = await searchCourseMock({});
-    
+
     if (curriculumResponse.code === '200' && coursesResponse.code === '200') {
       // 更新培养方案数据
       formData.sections = curriculumResponse.data.sections;
-      
+
       // 更新所有课程数据
       allCourses.value = coursesResponse.data.course_list;
-      
+
       // 初始化已添加的课程的完整信息
       updateCoursesInSections();
-      
+
       hasCurriculum.value = true;
       ElMessage.success('培养方案加载成功');
     } else {
-      const errorMsg = curriculumResponse.code !== '200' 
-        ? curriculumResponse.message 
+      const errorMsg = curriculumResponse.code !== '200'
+        ? curriculumResponse.message
         : coursesResponse.message;
       ElMessage.error(`获取数据失败: ${errorMsg}`);
     }
@@ -364,14 +314,14 @@ const showAddCourseDialog = (course) => {
     ElMessage.warning('请先添加至少一个模块');
     return;
   }
-  
+
   // 检查是否有可用模块(有名称的模块)
   const availableSections = formData.sections.filter(s => s.section_name);
   if (availableSections.length === 0) {
     ElMessage.warning('请先为模块设置名称');
     return;
   }
-  
+
   currentSelectingCourse.value = course;
   selectedSectionForCourse.value = formData.sections[0].section_name;
   showSelectSectionDialog.value = true;
@@ -383,20 +333,20 @@ const confirmAddCourseToSection = () => {
     ElMessage.warning('请选择一个模块');
     return;
   }
-  
+
   const course = currentSelectingCourse.value;
   const section = formData.sections.find(s => s.section_name === selectedSectionForCourse.value);
-  
+
   if (section && course) {
     // 添加到指定模块
     section.course_list.push({
       course_name: course.course_name,
       credit: course.credit
     });
-    
+
     ElMessage.success(`已添加课程: ${course.course_name} 到模块: ${section.section_name}`);
   }
-  
+
   showSelectSectionDialog.value = false;
 };
 
@@ -409,7 +359,7 @@ const removeCourseFromCurriculum = (course) => {
       section.course_list.splice(courseIndex, 1);
     }
   });
-  
+
   ElMessage.success(`已从培养方案中移除课程: ${course.course_name}`);
 };
 
@@ -417,12 +367,12 @@ const removeCourseFromCurriculum = (course) => {
 const removeCourseFromSection = (section, courseIndex) => {
   const courseName = section.course_list[courseIndex].course_name;
   section.course_list.splice(courseIndex, 1);
-  
+
   // 检查该课程是否还在其他模块中
-  const stillExists = formData.sections.some(s => 
+  const stillExists = formData.sections.some(s =>
     s.course_list.some(c => c.course_name === courseName)
   );
-  
+
   if (!stillExists) {
     ElMessage.success(`已从培养方案中移除课程: ${courseName}`);
   } else {
@@ -442,7 +392,7 @@ const addSection = () => {
 // 移除模块
 const removeSection = (sectionIndex) => {
   const section = formData.sections[sectionIndex];
-  
+
   // 如果模块中有课程，提示确认
   if (section.course_list.length > 0) {
     ElMessageBox.confirm(`该模块包含 ${section.course_list.length} 门课程，确定要删除吗？`, '提示', {
@@ -451,7 +401,7 @@ const removeSection = (sectionIndex) => {
       type: 'warning'
     }).then(() => {
       executeRemoveSection(sectionIndex);
-    }).catch(() => {});
+    }).catch(() => { });
   } else {
     executeRemoveSection(sectionIndex);
   }
@@ -475,16 +425,16 @@ const isSectionCreditEnough = (section) => {
 
 // 检查所有模块学分是否达标
 const checkAllSectionsCredit = () => {
-  const invalidSections = formData.sections.filter(section => 
+  const invalidSections = formData.sections.filter(section =>
     section.section_name && !isSectionCreditEnough(section)
   );
-  
+
   if (invalidSections.length > 0) {
     const sectionNames = invalidSections.map(s => `"${s.section_name}"`).join(', ');
     ElMessage.warning(`以下模块学分未达到要求: ${sectionNames}`);
     return false;
   }
-  
+
   return true;
 };
 
@@ -502,7 +452,7 @@ const saveCurriculum = async () => {
       return;
     }
   }
-  
+
   // 检查模块学分是否达标
   if (!checkAllSectionsCredit()) {
     return;
@@ -510,10 +460,10 @@ const saveCurriculum = async () => {
 
   try {
     saving.value = true;
-    
+
     // 真实API请求
     const response = await adminAPI.setCurriculum(formData);
-    
+
     if (response.code === '200') {
       ElMessage.success('培养方案保存成功');
     } else {
@@ -546,7 +496,8 @@ onMounted(() => {
   gap: 20px;
 }
 
-.form-card, .curriculum-card {
+.form-card,
+.curriculum-card {
   margin-bottom: 20px;
 }
 
@@ -560,7 +511,8 @@ onMounted(() => {
   align-items: center;
 }
 
-.card-header h2, .card-header h3 {
+.card-header h2,
+.card-header h3 {
   margin-bottom: 10px;
 }
 
