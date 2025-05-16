@@ -51,6 +51,33 @@ interface UpdateTimeSettingsResponse {
     message: string;
 }
 
+// 管理员手动选课相关接口类型
+interface AdminChooseCourseRequest {
+    student_id: number;
+    course_id: number;
+}
+
+interface AdminChooseCourseResponse {
+    code: string;
+    message: string;
+}
+
+interface StudentCoursesResponse {
+    code: string;
+    message: string;
+    data: {
+        student_name: string;
+        course_list: Array<{
+            course_id: number;
+            course_name: string;
+            teacher_name: string;
+            credit: number;
+            class_time: string;
+            classroom: string;
+        }>
+    }
+}
+
 // 处理错误的通用函数
 const handleError = (error: unknown) => {
     if (axios.isAxiosError(error)) {
@@ -61,6 +88,7 @@ const handleError = (error: unknown) => {
         throw new Error('An unexpected error occurred');
     }
 };
+
 /*
 // 获取选课系统时间设置
 export const getTimeSettings = async (): Promise<TimeSettingsResponse> => {
@@ -116,12 +144,45 @@ export function getTimeSettings() {
   });
 }
 
+// 以下是 mock 版本的 getStudentCourses 函数
+export function getStudentCourses(studentId) {
+  console.log('Using mock getStudentCourses for student ID:', studentId);
+  
+  // 返回固定的成功响应，使用图片中的课程数据
+  return Promise.resolve({
+    code: '200',
+    message: 'Success',
+    data: {
+      student_name: `学生${studentId}`,
+      course_list: [
+        {
+          course_id: 2,
+          course_name: '线性代数',
+          teacher_name: '李四',
+          credit: 2,
+          class_time: '周二 3-4节',
+          classroom: 'B202',
+        }
+      ]
+    }
+  });
+}
 
-
-
+// 以下是 mock 版本的 adminChooseCourseForStudent 函数
+export function adminChooseCourseForStudent(params) {
+  console.log('Using mock adminChooseCourseForStudent with params:', params);
+  
+  // 始终返回成功响应
+  return Promise.resolve({
+    code: '200',
+    message: '选课成功'
+  });
+}
 
 // 管理员端API
 export const adminAPI = {
     getTimeSettings,
-    updateTimeSettings
+    updateTimeSettings,
+    getStudentCourses,
+    adminChooseCourseForStudent
 };
