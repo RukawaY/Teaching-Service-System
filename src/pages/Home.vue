@@ -1,7 +1,7 @@
 <template>
   <!-- 页面卡片显示区 -->
   <div style="display: flex;flex-wrap: wrap; justify-content: start;">
-
+    <!-- 学生的界面 -->
     <el-button class="cardBox" @click="goToChooseCurriculum()" v-if="user == 'student'">
       <div>
         <div style="font-size: 28px;font-weight: bold;">定制培养方案</div>
@@ -42,6 +42,7 @@
       </div>
     </el-button>
 
+    <!-- 老师的界面 -->
     <el-button class="cardBox" @click="goToShowResultTeacher()" v-if="user == 'teacher'">
       <div>
         <div style="font-size: 26px;font-weight: bold;">查看选课结果<br>（教师端）</div>
@@ -50,6 +51,7 @@
       </div>
     </el-button>
 
+    <!-- 管理员的界面 -->
     <el-button class="cardBox" @click="goToManage()" v-if="user == 'admin'">
       <div>
         <div style="font-size: 28px;font-weight: bold;">课程选择管理</div>
