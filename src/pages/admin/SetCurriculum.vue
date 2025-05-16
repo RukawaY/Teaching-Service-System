@@ -211,8 +211,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import axios from 'axios';
 import { searchCourseMock } from '../../api/student';
+import { adminAPI } from '../../api/admin';
 
 // 表单校验规则
 const rules = {
@@ -245,15 +245,6 @@ const allCourses = ref([]);
 const formData = reactive({
   major_name: '',
   sections: []
-});
-
-// API请求实例
-const API_BASE_URL = 'http://localhost:8080';
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 // 计算属性: 已添加到培养方案的课程
@@ -311,39 +302,10 @@ const queryCurriculum = async () => {
   try {
     loading.value = true;
     
-    // 在实际项目中调用后端API
-    // const response = await api.get('/api/manager/get_curriculum', {
-    //   params: { major_name: formData.major_name }
-    // });
+    // 获取专业培养方案
+    const curriculumResponse = await adminAPI.getCurriculum(formData.major_name);
     
-    // 模拟API响应 - 获取专业培养方案
-    const curriculumResponse = {
-      code: '200',
-      message: 'Success',
-      data: {
-        major_name: formData.major_name,
-        sections: [
-          {
-            section_name: '必修课',
-            section_credit: 12,
-            course_list: [
-              { course_name: "高等数学", credit: 3 },
-              { course_name: "线性代数", credit: 2 }
-            ]
-          },
-          {
-            section_name: '选修课',
-            section_credit: 8,
-            course_list: [
-              { course_name: "人工智能", credit: 2 },
-              { course_name: "软件工程", credit: 2 }
-            ]
-          }
-        ]
-      }
-    };
-    
-    // 同时获取所有课程列表
+    // 获取所有课程列表，使用真实API而不是mock
     const coursesResponse = await searchCourseMock({});
     
     if (curriculumResponse.code === '200' && coursesResponse.code === '200') {
@@ -359,11 +321,14 @@ const queryCurriculum = async () => {
       hasCurriculum.value = true;
       ElMessage.success('培养方案加载成功');
     } else {
-      ElMessage.error('获取数据失败');
+      const errorMsg = curriculumResponse.code !== '200' 
+        ? curriculumResponse.message 
+        : coursesResponse.message;
+      ElMessage.error(`获取数据失败: ${errorMsg}`);
     }
   } catch (error) {
     console.error('查询失败:', error);
-    ElMessage.error('查询培养方案失败');
+    ElMessage.error('查询培养方案失败: ' + (error.message || '未知错误'));
   } finally {
     loading.value = false;
   }
@@ -546,21 +511,18 @@ const saveCurriculum = async () => {
   try {
     saving.value = true;
     
-    // API请求
-    // const response = await api.post('/api/manager/set_curriculum', formData);
+    // 真实API请求
+    const response = await adminAPI.setCurriculum(formData);
     
-    // 模拟API响应
-    console.log('将保存的培养方案数据:', JSON.stringify(formData));
-    
-    // 模拟成功响应
-    setTimeout(() => {
+    if (response.code === '200') {
       ElMessage.success('培养方案保存成功');
-      saving.value = false;
-    }, 1000);
-    
+    } else {
+      ElMessage.error(`保存失败: ${response.message}`);
+    }
   } catch (error) {
     console.error('保存失败:', error);
-    ElMessage.error('保存培养方案失败');
+    ElMessage.error('保存培养方案失败: ' + (error.message || '未知错误'));
+  } finally {
     saving.value = false;
   }
 };
