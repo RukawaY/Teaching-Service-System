@@ -76,7 +76,7 @@ const pageTitle = computed(() => {
       case '/searchCourse':
         return '搜索课程信息'
       case '/chooseCourse':
-        return '选择课程'
+        return '课程初选'
       case '/showResult':
         return '查看选课结果'
       case '/showResultTeacher':
@@ -87,6 +87,10 @@ const pageTitle = computed(() => {
         return '手动选择课程'
       case '/setCurriculum':
         return '制订培养方案'
+      case '/chooseCourseSupplementary':
+        return '课程补选'
+      case '/manageSupplementary':
+        return '课程补选管理'
     }
   }
 })

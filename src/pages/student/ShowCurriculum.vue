@@ -50,7 +50,7 @@
 <script setup>
 import { ref, computed, reactive } from 'vue';
 import { ElMessage } from 'element-plus';
-import { getPersonalCurriculum } from '../api/student.ts';
+import { getPersonalCurriculum } from '../../api/student';
 
 const formData = reactive({
   studentId: ''

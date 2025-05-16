@@ -67,6 +67,7 @@ interface courseQuery {
     teacher_name?: String;
     course_id?: Number;
     student_id?: Number; // 可选，如果为空是在searchCourse中调用，表示返回所有课程，否则在chooseCourse中调用，表示只能查看自己专业的课程
+    need_available?: Boolean;
 }
 
 interface detailedCourseInfo {
@@ -89,10 +90,29 @@ interface courseQueryResponse {
     }
 }
 
-interface setPersonalCurriculumInfoResponse {
+interface postResponse {
     code: String;
     message: String;
 }
+
+interface supplementaryCourseQuery {
+    student_id: Number;
+    course_id: Number;
+}
+
+interface suppResult {
+    course_id: Number;
+    result: String;
+}
+
+interface getSuppResultResponse {
+    code: String;
+    message: String;
+    data: {
+        result_list: Array<suppResult>;
+    }
+}
+
 
 const handleError = (error: unknown) => {
     if (axios.isAxiosError(error)) {
@@ -106,7 +126,7 @@ const handleError = (error: unknown) => {
 
 export const getMajorCurriculum = async (major_name: String): Promise<majorCurriculumQueryResponse> => {
     try {
-        const response = await api.get(`/api/student/get_curriculum`, {
+        const response = await api.get(`/api/get_curriculum`, {
             params: {
                 major_name: major_name
             }
@@ -119,7 +139,7 @@ export const getMajorCurriculum = async (major_name: String): Promise<majorCurri
 }
 
 
-export const setPersonalCurriculum = async (params: personalCurriculumInfo): Promise<setPersonalCurriculumInfoResponse> => {
+export const setPersonalCurriculum = async (params: personalCurriculumInfo): Promise<postResponse> => {
     try {
         const response = await api.post(`/api/student/set_personal_curriculum`, params);
         return response.data;
@@ -145,8 +165,32 @@ export const getPersonalCurriculum = async (student_id: Number): Promise<student
 
 export const searchCourse = async (params: courseQuery): Promise<courseQueryResponse> => {
     try {
-        const response = await api.get(`/api/student/search_course`, {
+        const response = await api.get(`/api/search_course`, {
             params: params
+        });
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+}
+
+export const chooseCourseSupp = async (params: supplementaryCourseQuery): Promise<postResponse> => {
+    try {
+        const response = await api.post(`/api/student/apply_supplement`, params);
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+}
+
+export const getSuppResult = async (student_id: Number): Promise<getSuppResultResponse> => {
+    try {
+        const response = await api.get(`/api/student/get_supp_result`, {
+            params: {
+                student_id: student_id
+            }
         });
         return response.data;
     } catch (error) {
@@ -159,5 +203,7 @@ export const studentAPI = {
     getMajorCurriculum,
     setPersonalCurriculum,
     getPersonalCurriculum,
-    searchCourse
+    searchCourse,
+    chooseCourseSupp,
+    getSuppResult
 }

@@ -74,13 +74,13 @@
     >
       <div v-if="selectedCourse" class="course-details">
         <h3>{{ selectedCourse.course_name }}</h3>
-        <el-descriptions :column="1">
+        <el-descriptions :column="3">
           <el-descriptions-item label="课程 ID">{{ selectedCourse.course_id }}</el-descriptions-item>
           <el-descriptions-item label="授课教师">{{ selectedCourse.teacher_name }}</el-descriptions-item>
           <el-descriptions-item label="课程学分">{{ selectedCourse.credit }}</el-descriptions-item>
           <el-descriptions-item label="上课时间">{{ selectedCourse.class_time }}</el-descriptions-item>
           <el-descriptions-item label="上课教室">{{ selectedCourse.classroom }}</el-descriptions-item>
-          <el-descriptions-item label="课程容量">{{ selectedCourse.available_capacity }}/{{ selectedCourse.total_capacity }}</el-descriptions-item>
+          <el-descriptions-item label="课程容量">{{ selectedCourse.available_capacity }} / {{ selectedCourse.total_capacity }}</el-descriptions-item>
           <el-descriptions-item label="课程描述">{{ selectedCourse.course_description }}</el-descriptions-item>
         </el-descriptions>
       </div>
@@ -96,7 +96,7 @@
 <script setup>
 import { ref, computed, reactive } from 'vue';
 import { ElMessage } from 'element-plus';
-import { searchCourse } from '../api/student.ts';
+import { searchCourse } from '../../api/student';
 
 const formData = reactive({
   courseName: '',

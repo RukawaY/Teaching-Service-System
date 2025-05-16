@@ -28,9 +28,17 @@
 
     <el-button class="cardBox" @click="goToChooseCourse()" v-if="user == 'student'">
       <div>
-        <div style="font-size: 28px;font-weight: bold;">选择课程</div>
+        <div style="font-size: 28px;font-weight: bold;">课程初选</div>
         <el-divider />
         <el-icon size="150px" color="#67C23A"><Calendar /></el-icon>
+      </div>
+    </el-button>
+
+    <el-button class="cardBox" @click="goToChooseCourseSupp()" v-if="user == 'student'">
+      <div>
+        <div style="font-size: 28px;font-weight: bold;">课程补选</div>
+        <el-divider />
+        <el-icon size="150px" color="pink"><Collection /></el-icon>
       </div>
     </el-button>
 
@@ -76,13 +84,18 @@
       </div>
     </el-button>
 
+    <el-button class="cardBox" @click="goToManageSupp()" v-if="user == 'admin'">
+      <div>
+        <div style="font-size: 28px;font-weight: bold;">课程补选管理</div>
+        <el-divider />
+        <el-icon size="150px" color="#E6A23C"><EditPen /></el-icon>
+      </div>
+    </el-button>
+    
   </div>
 </template>
 
 <script setup>
-// 从Element Plus图标库导入InfoFilled图标组件
-import { InfoFilled } from '@element-plus/icons-vue';
-// 从Vue中导入inject函数，用于注入由父组件(App.vue)提供的数据
 import { inject } from 'vue';
 // 导入Vue Router的useRouter组合式API，用于编程式导航
 import { useRouter } from 'vue-router';
@@ -193,6 +206,14 @@ function goToManualChoose() {
 function goToSetCurriculum() {
   is_homepage.set(false);
   router.push('/setCurriculum');
+}
+function goToChooseCourseSupp() {
+  is_homepage.set(false);
+  router.push('/chooseCourseSupplementary');
+}
+function goToManageSupp() {
+  is_homepage.set(false);
+  router.push('/manageSupplementary');
 }
 </script>
 
