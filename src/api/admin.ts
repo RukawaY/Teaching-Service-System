@@ -3,111 +3,111 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:8080';
 
 const api = axios.create({
-    baseURL: API_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 api.interceptors.request.use(
-    (config) => {
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
+  (config) => {
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 api.interceptors.response.use(
-    (response) => {
-        return response;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
+  (response) => {
+    return response;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 // 定义接口类型
 interface TimeSettingsResponse {
-    code: string;
-    message: string;
-    data: {
-        max_number: string;
-        first_time_list: string[];
-        second_time_list: string[];
-        drop_time_list: string[];
-    };
-}
-
-interface UpdateTimeSettingsRequest {
-    max_number: number;
+  code: string;
+  message: string;
+  data: {
+    max_number: string;
     first_time_list: string[];
     second_time_list: string[];
     drop_time_list: string[];
+  };
+}
+
+interface UpdateTimeSettingsRequest {
+  max_number: number;
+  first_time_list: string[];
+  second_time_list: string[];
+  drop_time_list: string[];
 }
 
 interface UpdateTimeSettingsResponse {
-    code: string;
-    message: string;
+  code: string;
+  message: string;
 }
 
 // 管理员手动选课相关接口类型
 interface AdminChooseCourseRequest {
-    student_id: number;
-    course_id: number;
+  student_id: number;
+  course_id: number;
 }
 
 interface AdminChooseCourseResponse {
-    code: string;
-    message: string;
+  code: string;
+  message: string;
 }
 
 interface StudentCoursesResponse {
-    code: string;
-    message: string;
-    data: {
-        student_name: string;
-        course_list: Array<{
-            course_id: number;
-            course_name: string;
-            teacher_name: string;
-            credit: number;
-            class_time: string;
-            classroom: string;
-        }>
-    }
+  code: string;
+  message: string;
+  data: {
+    student_name: string;
+    course_list: Array<{
+      course_id: number;
+      course_name: string;
+      teacher_name: string;
+      credit: number;
+      class_time: string;
+      classroom: string;
+    }>
+  }
 }
 
 // 补选申请相关接口类型
 interface SuppApplication {
-    supplement_id: number;
-    student_id: number;
-    student_name: string;
-    course_id: number;
-    course_name: string;
-    result: boolean | null;
+  supplement_id: number;
+  student_id: number;
+  student_name: string;
+  course_id: number;
+  course_name: string;
+  result: boolean | null;
 }
 
 interface GetSuppApplicationsRequest {
-    course_id?: number;
+  course_id?: number;
 }
 
 interface GetSuppApplicationsResponse {
-    code: string;
-    message: string;
-    data: {
-        supplement_list: SuppApplication[];
-    }
+  code: string;
+  message: string;
+  data: {
+    supplement_list: SuppApplication[];
+  }
 }
 
 interface ProcessSuppRequest {
-    supplement_id: number;
-    result: boolean;
+  supplement_id: number;
+  result: boolean;
 }
 
 interface ProcessSuppResponse {
-    code: string;
-    message: string;
+  code: string;
+  message: string;
 }
 
 // 培养方案相关接口类型
@@ -138,13 +138,13 @@ interface CurriculumResponse {
 
 // 处理错误的通用函数
 const handleError = (error: unknown) => {
-    if (axios.isAxiosError(error)) {
-        console.error('API Error:', error.response?.data || error.message);
-        throw new Error(error.response?.data?.message || 'Network error');
-    } else {
-        console.error('Unexpected Error:', error);
-        throw new Error('An unexpected error occurred');
-    }
+  if (axios.isAxiosError(error)) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Network error');
+  } else {
+    console.error('Unexpected Error:', error);
+    throw new Error('An unexpected error occurred');
+  }
 };
 
 /*
@@ -206,7 +206,7 @@ export function getTimeSettings() {
 // !!!以下是 mock 版本的 getStudentCourses 函数
 export function getStudentCourses(studentId) {
   console.log('Using mock getStudentCourses for student ID:', studentId);
-  
+
   // 返回固定的成功响应，使用图片中的课程数据
   return Promise.resolve({
     code: '200',
@@ -230,7 +230,7 @@ export function getStudentCourses(studentId) {
 // !!!!!!!以下是 mock 版本的 adminChooseCourseForStudent 函数
 export function adminChooseCourseForStudent(params) {
   console.log('Using mock adminChooseCourseForStudent with params:', params);
-  
+
   // 始终返回成功响应
   return Promise.resolve({
     code: '200',
@@ -241,7 +241,7 @@ export function adminChooseCourseForStudent(params) {
 // !!!mock版本的获取补选申请列表函数
 export function getSuppApplications(params) {
   console.log('Using mock getSuppApplications with params:', params);
-  
+
   // 构造模拟数据
   const mockApplications = [
     {
@@ -277,14 +277,14 @@ export function getSuppApplications(params) {
       result: null
     }
   ];
-  
+
   // 过滤数据（根据nage course_id）
   let filteredApplications = mockApplications;
-  
+
   if (params && params.course_id) {
     filteredApplications = filteredApplications.filter(app => app.course_id === params.course_id);
   }
-  
+
   return Promise.resolve({
     code: '200',
     message: 'Success',
@@ -297,7 +297,7 @@ export function getSuppApplications(params) {
 // !!!mock版本的处理补选申请函数
 export function processSupplementary(params) {
   console.log('Using mock processSupplementary with params:', params);
-  
+
   // 始终返回成功响应
   return Promise.resolve({
     code: '200',
@@ -308,11 +308,11 @@ export function processSupplementary(params) {
 // !!!mock版本的获取专业培养方案函数
 export function getCurriculum(major_name: string) {
   console.log('Using mock getCurriculum for major:', major_name);
-  
+
   // 构造不同专业的模拟数据
   let sections = [];
-  
-  switch(major_name.toLowerCase()) {
+
+  switch (major_name.toLowerCase()) {
     case '计算机科学与技术':
       sections = [
         {
@@ -349,7 +349,7 @@ export function getCurriculum(major_name: string) {
         }
       ];
       break;
-      
+
     case '软件工程':
       sections = [
         {
@@ -377,7 +377,7 @@ export function getCurriculum(major_name: string) {
         }
       ];
       break;
-      
+
     case '人工智能':
       sections = [
         {
@@ -412,7 +412,7 @@ export function getCurriculum(major_name: string) {
         }
       ];
       break;
-      
+
     default:
       // 默认返回一些基础课程
       sections = [
@@ -435,7 +435,7 @@ export function getCurriculum(major_name: string) {
         }
       ];
   }
-  
+
   return Promise.resolve({
     code: '200',
     message: 'Success',
@@ -449,7 +449,7 @@ export function getCurriculum(major_name: string) {
 // !!!mock版本的设置专业培养方案函数
 export function setCurriculum(params: CurriculumRequest) {
   console.log('Using mock setCurriculum with data:', JSON.stringify(params, null, 2));
-  
+
   // 验证必要的参数
   if (!params.major_name) {
     return Promise.resolve({
@@ -457,14 +457,14 @@ export function setCurriculum(params: CurriculumRequest) {
       message: '缺少专业名称参数'
     });
   }
-  
+
   if (!params.sections || params.sections.length === 0) {
     return Promise.resolve({
       code: '400',
       message: '培养方案必须包含至少一个模块'
     });
   }
-  
+
   // 验证每个模块是否都有名称和课程
   const invalidSections = params.sections.filter(section => !section.section_name);
   if (invalidSections.length > 0) {
@@ -473,13 +473,13 @@ export function setCurriculum(params: CurriculumRequest) {
       message: '存在未命名的模块'
     });
   }
-  
+
   // 验证课程学分是否达标
   const invalidCreditSections = params.sections.filter(section => {
     const totalCredit = section.course_list.reduce((sum, course) => sum + Number(course.credit), 0);
     return totalCredit < section.section_credit;
   });
-  
+
   if (invalidCreditSections.length > 0) {
     const sectionNames = invalidCreditSections.map(s => s.section_name).join(', ');
     return Promise.resolve({
@@ -487,7 +487,7 @@ export function setCurriculum(params: CurriculumRequest) {
       message: `以下模块学分未达到要求: ${sectionNames}`
     });
   }
-  
+
   // 模拟保存成功
   return Promise.resolve({
     code: '200',
@@ -527,67 +527,67 @@ export const setCurriculum = async (params: CurriculumRequest): Promise<{ code: 
 //!!!!!!!!!!!!!! 为了测试admin/ManualChoose.vue 的Mock版本api响应函数
 // 添加 mock 版本的 searchCourse 函数
 export function searchCourseMock(params) {
-    console.log('Using mock searchCourse with params:', params);
-    
-    return Promise.resolve({
-        code: '200',
-        message: 'Success',
-        data: {
-            course_list: [
-                {
-                    course_id: 1,
-                    course_name: '高等数学',
-                    teacher_name: '张三',
-                    credit: 3,
-                    class_time: '周一 1-2节',
-                    classroom: 'A101',
-                },
-                {
-                    course_id: 3,
-                    course_name: '大学物理',
-                    teacher_name: '王五',
-                    credit: 4,
-                    class_time: '周三 5-6节',
-                    classroom: 'C303',
-                    available_capacity: 35,
-                    total_capacity: 50,
-                    course_description: '大学物理是理工科学生必修的基础课程之一'
-                },
-                {
-                    course_id: 4,
-                    course_name: '数据结构',
-                    teacher_name: '赵六',
-                    credit: 3,
-                    class_time: '周四 1-2节',
-                    classroom: 'D404',
-                    available_capacity: 25,
-                    total_capacity: 40,
-                    course_description: '数据结构是计算机专业核心课程'
-                },
-                {
-                    course_id: 5,
-                    course_name: '计算机网络',
-                    teacher_name: '钱七',
-                    credit: 3,
-                    class_time: '周一 1-2节',
-                    classroom: 'E505',
-                    available_capacity: 30,
-                    total_capacity: 45,
-                    course_description: '计算机网络是计算机科学与技术专业的专业基础课'
-                }
-            ]
+  console.log('Using mock searchCourse with params:', params);
+
+  return Promise.resolve({
+    code: '200',
+    message: 'Success',
+    data: {
+      course_list: [
+        {
+          course_id: 1,
+          course_name: '高等数学',
+          teacher_name: '张三',
+          credit: 3,
+          class_time: '周一 1-2节',
+          classroom: 'A101',
+        },
+        {
+          course_id: 3,
+          course_name: '大学物理',
+          teacher_name: '王五',
+          credit: 4,
+          class_time: '周三 5-6节',
+          classroom: 'C303',
+          available_capacity: 35,
+          total_capacity: 50,
+          course_description: '大学物理是理工科学生必修的基础课程之一'
+        },
+        {
+          course_id: 4,
+          course_name: '数据结构',
+          teacher_name: '赵六',
+          credit: 3,
+          class_time: '周四 1-2节',
+          classroom: 'D404',
+          available_capacity: 25,
+          total_capacity: 40,
+          course_description: '数据结构是计算机专业核心课程'
+        },
+        {
+          course_id: 5,
+          course_name: '计算机网络',
+          teacher_name: '钱七',
+          credit: 3,
+          class_time: '周一 1-2节',
+          classroom: 'E505',
+          available_capacity: 30,
+          total_capacity: 45,
+          course_description: '计算机网络是计算机科学与技术专业的专业基础课'
         }
-    });
+      ]
+    }
+  });
 }
 
 // 管理员端API
 export const adminAPI = {
-    getTimeSettings,
-    updateTimeSettings,
-    getStudentCourses,
-    adminChooseCourseForStudent,
-    getSuppApplications,
-    processSupplementary,
-    getCurriculum,
-    setCurriculum,
+  getTimeSettings,
+  updateTimeSettings,
+  getStudentCourses,
+  adminChooseCourseForStudent,
+  getSuppApplications,
+  processSupplementary,
+  getCurriculum,
+  setCurriculum,
 };

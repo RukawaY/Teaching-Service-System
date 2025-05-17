@@ -24,17 +24,17 @@ function updateIsHomepage(value) {
 provide('user', user);
 provide('user_name', user_name);
 provide('user_avatar', user_avatar);
-provide('is_homepage', { 
+provide('is_homepage', {
   get: () => is_homepage.value,
   set: updateIsHomepage
-}); 
+});
 
 </script>
 
 <template>
   <div>
     <TopBar />
-    <RouterView style="margin-top: 80px; padding-bottom: 70px;"/>
+    <RouterView style="margin-top: 80px; padding-bottom: 70px;" />
     <BottomBar />
   </div>
 </template>
