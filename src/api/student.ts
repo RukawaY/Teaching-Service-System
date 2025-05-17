@@ -175,61 +175,7 @@ export const searchCourse = async (params: courseQuery): Promise<courseQueryResp
     }
 }
 
-//!!!!!!!!!!!!!! 为了测试admin/ManualChoose.vue 的Mock版本api响应函数
-// 添加 mock 版本的 searchCourse 函数
-export function searchCourseMock(params) {
-    console.log('Using mock searchCourse with params:', params);
-    
-    return Promise.resolve({
-        code: '200',
-        message: 'Success',
-        data: {
-            course_list: [
-                {
-                    course_id: 1,
-                    course_name: '高等数学',
-                    teacher_name: '张三',
-                    credit: 3,
-                    class_time: '周一 1-2节',
-                    classroom: 'A101',
-                },
-                {
-                    course_id: 3,
-                    course_name: '大学物理',
-                    teacher_name: '王五',
-                    credit: 4,
-                    class_time: '周三 5-6节',
-                    classroom: 'C303',
-                    available_capacity: 35,
-                    total_capacity: 50,
-                    course_description: '大学物理是理工科学生必修的基础课程之一'
-                },
-                {
-                    course_id: 4,
-                    course_name: '数据结构',
-                    teacher_name: '赵六',
-                    credit: 3,
-                    class_time: '周四 1-2节',
-                    classroom: 'D404',
-                    available_capacity: 25,
-                    total_capacity: 40,
-                    course_description: '数据结构是计算机专业核心课程'
-                },
-                {
-                    course_id: 5,
-                    course_name: '计算机网络',
-                    teacher_name: '钱七',
-                    credit: 3,
-                    class_time: '周一 1-2节',
-                    classroom: 'E505',
-                    available_capacity: 30,
-                    total_capacity: 45,
-                    course_description: '计算机网络是计算机科学与技术专业的专业基础课'
-                }
-            ]
-        }
-    });
-}
+
 
 export const chooseCourseSupp = async (params: supplementaryCourseQuery): Promise<postResponse> => {
     try {

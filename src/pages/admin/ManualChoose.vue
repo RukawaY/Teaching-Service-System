@@ -73,7 +73,7 @@ import { ref, computed, reactive } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getStudentCourses, adminChooseCourseForStudent } from '../../api/admin';
 //import { searchCourse } from '../../api/student';  // 从student.ts导入searchCourse函数
-import { searchCourseMock } from '../../api/student'; // 从course.ts导入searchCourse函数
+import { searchCourseMock } from '../../api/admin'; // 从admin.ts导入searchCourse函数
 
 const formData = reactive({
   studentId: '',
