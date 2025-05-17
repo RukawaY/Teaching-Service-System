@@ -175,6 +175,8 @@ export const searchCourse = async (params: courseQuery): Promise<courseQueryResp
     }
 }
 
+
+
 export const chooseCourseSupp = async (params: supplementaryCourseQuery): Promise<postResponse> => {
     try {
         const response = await api.post(`/api/student/apply_supplement`, params);
