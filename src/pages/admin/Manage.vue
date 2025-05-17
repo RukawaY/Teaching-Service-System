@@ -213,39 +213,4 @@ onMounted(() => {
   fetchTimeSettings();
 })
 
-/**
- * El-Table 组件基本语法和用法说明:
- * 
- * 1. 基本结构:
- *    - el-table: 表格容器组件
- *    - el-table-column: 定义表格的每一列
- * 
- * 2. 重要属性:
- *    - :data - 绑定表格数据源，必须是数组
- *    - stripe - 是否显示斑马纹表格
- *    - border - 是否显示边框
- *    - height/max-height - 设置表格高度，可固定表头
- * 
- * 3. el-table-column 属性:
- *    - prop - 对应列内容的字段名
- *    - label - 列标题
- *    - width - 列宽度
- *    - fixed - 固定列(true/'left'/'right')
- *    - sortable - 是否可排序
- * 
- * 4. 自定义列内容:
- *    - 通过 template #default="scope" 自定义单元格内容
- *    - scope.row 获取当前行数据
- *    - scope.$index 获取当前行索引
- * 
- * 5. 表格事件:
- *    - @selection-change - 多选时选择项变化触发
- *    - @row-click - 行点击事件
- *    - @sort-change - 排序变化事件
- * 
- * 6. 表格功能:
- *    - 排序: 添加 sortable 属性
- *    - 筛选: 添加 filters 和 filter-method
- *    - 多选: 添加 type="selection" 的列
- */
 </script>

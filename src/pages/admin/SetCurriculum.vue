@@ -211,7 +211,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { searchCourseMock } from '../../api/student';
+import { searchCourseMock } from '../../api/admin';
 import { adminAPI } from '../../api/admin';
 
 // 表单校验规则

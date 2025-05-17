@@ -97,112 +97,57 @@
 
 <script setup>
 import { inject } from 'vue';
-// 导入Vue Router的useRouter组合式API，用于编程式导航
 import { useRouter } from 'vue-router';
 
-// 通过inject获取当前用户角色，可能的值为'student', 'teacher', 'admin'
-// 用于条件渲染不同角色可见的功能卡片
 const user = inject('user');
 
-// 初始化路由器实例，用于页面导航
 const router = useRouter();
 
-// 获取首页状态管理对象，包含get()和set()方法
-// 用于跟踪用户是否在首页，以控制顶部导航栏的显示逻辑
 const is_homepage = inject('is_homepage');
 
-/**
- * 导航到"定制培养方案"页面
- * 1. 设置非首页状态
- * 2. 执行路由跳转
- */
 function goToChooseCurriculum() {
-  // 更新首页状态为false，表示用户离开首页
-  // 这将触发App.vue中的localStorage持久化
+
   is_homepage.set(false);
-  // 使用router导航到定制培养方案页面
+
   router.push('/chooseCurriculum');
 }
 
-/**
- * 导航到"查看培养方案"页面
- * 1. 设置非首页状态
- * 2. 执行路由跳转
- */
 function goToShowCurriculum() {
-  // 更新首页状态为false，表示用户离开首页
   is_homepage.set(false);
-  // 使用router导航到查看培养方案页面
   router.push('/showCurriculum');
 }
 
-/**
- * 导航到"搜索课程信息"页面
- * 1. 设置非首页状态
- * 2. 执行路由跳转
- */
 function goToSearchCourse() {
-  // 更新首页状态为false，表示用户离开首页
   is_homepage.set(false);
-  // 使用router导航到搜索课程信息页面
   router.push('/searchCourse');
 }
 
-/**
- * 导航到"选择课程"页面
- * 1. 设置非首页状态
- * 2. 执行路由跳转
- */
+
 function goToChooseCourse() {
   is_homepage.set(false);
   router.push('/chooseCourse');
 }
 
-/**
- * 导航到"查看选课结果"页面
- * 1. 设置非首页状态
- * 2. 执行路由跳转
- */
 function goToShowResult() {
   is_homepage.set(false);
   router.push('/showResult');
 }
 
-/**
- * 导航到"查看选课结果（教师端）"页面
- * 1. 设置非首页状态
- * 2. 执行路由跳转
- */
 function goToShowResultTeacher() {
   is_homepage.set(false);
   router.push('/showResultTeacher');
 }
 
-/**
- * 导航到"课程选择管理"页面
- * 1. 设置非首页状态
- * 2. 执行路由跳转
- */
 function goToManage() {
   is_homepage.set(false);
   router.push('/manage');
 }
 
-/**
- * 导航到"手动选择课程"页面
- * 1. 设置非首页状态
- * 2. 执行路由跳转
- */
 function goToManualChoose() {
   is_homepage.set(false);
   router.push('/manualChoose');
 }
 
-/**
- * 导航到"制订培养方案"页面
- * 1. 设置非首页状态
- * 2. 执行路由跳转
- */
 function goToSetCurriculum() {
   is_homepage.set(false);
   router.push('/setCurriculum');
