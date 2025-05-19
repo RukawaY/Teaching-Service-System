@@ -147,11 +147,11 @@ const handleError = (error: unknown) => {
   }
 };
 
-/*
+
 // 获取选课系统时间设置
 export const getTimeSettings = async (): Promise<TimeSettingsResponse> => {
     try {
-        const response = await api.get('/api/manager/get_time');
+        const response = await api.get('/manager/get_time');
         return response.data;
     } catch (error) {
         handleError(error);
@@ -162,7 +162,7 @@ export const getTimeSettings = async (): Promise<TimeSettingsResponse> => {
 // 更新选课系统时间设置
 export const updateTimeSettings = async (params: UpdateTimeSettingsRequest): Promise<UpdateTimeSettingsResponse> => {
     try {
-        const response = await api.post('/api/manager/update_time', params);
+        const response = await api.post('/manager/update_time', params);
         return response.data;
     } catch (error) {
         handleError(error);
@@ -170,38 +170,7 @@ export const updateTimeSettings = async (params: UpdateTimeSettingsRequest): Pro
     }
 };
 
-*/
 
-// !!原始函数替换为 mock 版本
-export function updateTimeSettings(data) {
-  // 返回一个 Promise，模拟成功的 API 响应
-  return Promise.resolve({
-    code: '200',
-    message: 'Success',
-    data: data
-  });
-}
-
-// !!!以下是 mock 版本的 getTimeSettings 函数
-export function getTimeSettings() {
-  // 返回模拟的时间设置数据
-  return Promise.resolve({
-    code: '200',
-    message: 'Success',
-    data: {
-      max_number: 150,
-      first_time_list: [
-        new Date('2025-05-01 08:00:00').toISOString(),
-        new Date('2025-05-07 23:59:59').toISOString()
-      ],
-      second_time_list: [
-        new Date('2025-05-10 08:00:00').toISOString(),
-        new Date('2025-05-15 23:59:59').toISOString()
-      ],
-      drop_time_list: []
-    }
-  });
-}
 
 // !!!以下是 mock 版本的 getStudentCourses 函数
 export function getStudentCourses(studentId) {
@@ -226,6 +195,8 @@ export function getStudentCourses(studentId) {
     }
   });
 }
+
+
 
 // !!!!!!!以下是 mock 版本的 adminChooseCourseForStudent 函数
 export function adminChooseCourseForStudent(params) {
@@ -305,6 +276,7 @@ export function processSupplementary(params) {
   });
 }
 
+/*
 // !!!mock版本的获取专业培养方案函数
 export function getCurriculum(major_name: string) {
   console.log('Using mock getCurriculum for major:', major_name);
@@ -494,14 +466,14 @@ export function setCurriculum(params: CurriculumRequest) {
     message: `专业 "${params.major_name}" 培养方案设置成功`
   });
 }
+*/
 
 
 
-/*
 // 获取专业培养方案
 export const getCurriculum = async (major_name: string): Promise<CurriculumResponse> => {
   try {
-    const response = await api.get('/manager/get_curriculum', {
+    const response = await api.get('/get_curriculum', {
       params: { major_name }
     });
     return response.data;
@@ -522,7 +494,6 @@ export const setCurriculum = async (params: CurriculumRequest): Promise<{ code: 
   }
 };
 
-*/
 
 //!!!!!!!!!!!!!! 为了测试admin/ManualChoose.vue 的Mock版本api响应函数
 // 添加 mock 版本的 searchCourse 函数
