@@ -9,8 +9,8 @@
       </template>
 
       <el-form :model="formData" label-width="120px" class="input-form">
-        <el-form-item label="课程名称">
-          <el-input v-model="formData.courseName" placeholder="请输入课程名称(选填)" />
+        <el-form-item label="课程ID">
+          <el-input v-model.number="formData.courseId" placeholder="请输入课程ID(选填)" type="number" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="fetchSupplementaryApplications" :loading="loading">
@@ -75,7 +75,7 @@ import { getSuppApplications, processSupplementary } from '../../api/admin';
 
 // 定义响应式状态
 const formData = reactive({
-  courseName: ''
+  courseId: ''
 });
 
 const loading = ref(false);
@@ -94,7 +94,7 @@ const fetchSupplementaryApplications = async () => {
 
     // 构造查询参数
     const params = {};
-    if (formData.courseName) params.course_name = formData.courseName;
+    if (formData.courseId) params.course_id = formData.courseId;
 
     const response = await getSuppApplications(params);
 
@@ -104,9 +104,10 @@ const fetchSupplementaryApplications = async () => {
         supplement_id: item.supplement_id,
         student_name: item.student_name,
         course_name: item.course_name,
-        result: item.result || null
+        result: null
       }));
-      
+      console.log('补选申请列表aplications.value:', applications.value);
+      console.log('补选申请列表:response.data.supplement_list', response);
       totalApplications.value = applications.value.length;
 
       if (applications.value.length > 0) {
@@ -127,7 +128,7 @@ const fetchSupplementaryApplications = async () => {
 
 // 重置表单
 const resetForm = () => {
-  formData.courseName = '';
+  formData.courseId = '';
   applications.value = [];
 };
 

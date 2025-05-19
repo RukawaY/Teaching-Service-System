@@ -162,6 +162,7 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { adminAPI, searchCourse } from '../../api/admin';
+import { all } from 'axios';
 
 // 表单校验规则
 const rules = {
@@ -212,7 +213,6 @@ const addedCourses = computed(() => {
       }
     });
   });
-
   return courses;
 });
 
@@ -254,16 +254,29 @@ const queryCurriculum = async () => {
     // 获取专业培养方案
     const curriculumResponse = await adminAPI.getCurriculum(formData.major_name);
 
-    // 获取所有课程列表，使用真实API而不是mock
     const coursesResponse = await searchCourse({need_available: true});
 
     if (curriculumResponse.code === '200' && coursesResponse.code === '200') {
       // 更新培养方案数据
       formData.sections = curriculumResponse.data.sections;
-
+      console.log('培养方案sections数据:', formData.sections);
       // 更新所有课程数据
       allCourses.value = coursesResponse.data.course_list;
+      console.log('所有课程数据:', allCourses.value);
 
+      /*allCourses.value的结构
+      [{
+        course_id: number;
+        course_name: string;
+        course_description?: string;
+        teacher_name: string;
+        credit: number;
+        class_time: string;
+        classroom: string;
+        available_capacity?: number;
+        total_capacity?: number;
+      }]
+      */
       // 初始化已添加的课程的完整信息
       updateCoursesInSections();
 
@@ -283,7 +296,7 @@ const queryCurriculum = async () => {
   }
 };
 
-// 更新模块中课程的完整信息
+// 更新模块中课程的完整信息，保证前端模块的课程的学分信息始终和总课程表同步
 const updateCoursesInSections = () => {
   formData.sections.forEach(section => {
     section.course_list.forEach((course, index) => {

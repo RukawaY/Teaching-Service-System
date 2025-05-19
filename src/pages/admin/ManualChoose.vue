@@ -113,6 +113,8 @@ const searchStudentCourses = async () => {
 
       // 设置已选课程
       selectedCourses.value = response.data.course_list;
+      // 在控制台输出已选课程信息
+      console.log('学生已选课程:', selectedCourses.value);
 
       // 获取可选课程
       await fetchAvailableCourses();

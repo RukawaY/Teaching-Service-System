@@ -70,10 +70,13 @@ interface StudentCoursesResponse {
     course_list: Array<{
       course_id: number;
       course_name: string;
+      course_description?: string;
       teacher_name: string;
       credit: number;
       class_time: string;
       classroom: string;
+      available_capacity?: number;
+      total_capacity?: number;
     }>
   }
 }
@@ -81,9 +84,7 @@ interface StudentCoursesResponse {
 // 补选申请相关接口类型
 interface SuppApplication {
   supplement_id: number;
-  student_id: number;
   student_name: string;
-  course_id: number;
   course_name: string;
   result: boolean | null;
 }
@@ -95,9 +96,7 @@ interface GetSuppApplicationsRequest {
 interface GetSuppApplicationsResponse {
   code: string;
   message: string;
-  data: {
-    supplement_list: SuppApplication[];
-  }
+  supplement_list: SuppApplication[];
 }
 
 interface ProcessSuppRequest {
@@ -148,13 +147,13 @@ interface SearchCourseRequest {
 interface CourseInfo {
   course_id: number;
   course_name: string;
+  course_description?: string;
   teacher_name: string;
   credit: number;
   class_time: string;
   classroom: string;
   available_capacity?: number;
   total_capacity?: number;
-  course_description?: string;
 }
 
 interface SearchCourseResponse {
@@ -226,12 +225,11 @@ export const adminChooseCourseForStudent = async (params: AdminChooseCourseReque
 };
 
 // 补选申请相关接口
-export const getSuppApplications = async (params: { course_name?: string }): Promise<GetSuppApplicationsResponse> => {
+export const getSuppApplications = async (params: GetSuppApplicationsRequest): Promise<GetSuppApplicationsResponse> => {
   try {
     const axiosresponse = await api.get('/course_selection/manager/get_supplement', {
       params: params
     });
-        // 确保返回的数据结构与之前的mock数据结构一致
     return axiosresponse.data;
   } catch (error) {
     handleError(error);
@@ -242,8 +240,8 @@ export const getSuppApplications = async (params: { course_name?: string }): Pro
 // 处理补选申请
 export const processSupplementary = async (params: ProcessSuppRequest): Promise<ProcessSuppResponse> => {
   try {
-    const response = await api.post('/course_selection/manager/process_supplement', params);
-    return response.data;
+    const axiosresponse = await api.post('/course_selection/manager/process_supplement', params);
+    return axiosresponse.data;
   } catch (error) {
     handleError(error);
     throw error;
@@ -253,10 +251,10 @@ export const processSupplementary = async (params: ProcessSuppRequest): Promise<
 // 获取专业培养方案
 export const getCurriculum = async (major_name: string): Promise<CurriculumResponse> => {
   try {
-    const response = await api.get('/course_selection/get_curriculum', {
+    const axiosresponse = await api.get('/course_selection/get_curriculum', {
       params: { major_name }
     });
-    return response.data;
+    return axiosresponse.data;
   } catch (error) {
     handleError(error);
     throw error;
@@ -266,8 +264,8 @@ export const getCurriculum = async (major_name: string): Promise<CurriculumRespo
 // 设置专业培养方案
 export const setCurriculum = async (params: CurriculumRequest): Promise<{ code: string; message: string }> => {
   try {
-    const response = await api.post('/course_selection/manager/set_curriculum', params);
-    return response.data;
+    const axiosresponse = await api.post('/course_selection/manager/set_curriculum', params);
+    return axiosresponse.data;
   } catch (error) {
     handleError(error);
     throw error;
@@ -277,8 +275,8 @@ export const setCurriculum = async (params: CurriculumRequest): Promise<{ code: 
 // 课程搜索API实现
 export const searchCourse = async (params: SearchCourseRequest): Promise<SearchCourseResponse> => {
   try {
-    const response = await api.get('/course_selection/search_course', { params });
-    return response.data;
+    const axiosresponse = await api.get('/course_selection/search_course', { params });
+    return axiosresponse.data;
   } catch (error) {
     handleError(error);
     throw error;
