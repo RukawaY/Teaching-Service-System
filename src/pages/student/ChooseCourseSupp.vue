@@ -143,10 +143,10 @@ const submitApplication = async () => {
         student_id: formData.student_id,
         course_id: formData.course_id,
         course_name: course_info.data.course_name,
-        teacher_name: course_info.data.teacher_name,
-        class_time: course_info.data.class_time,
-        classroom: course_info.data.classroom,
-        credit: course_info.data.credit,
+        teacher_name: course_info.data.course_list[0].teacher_name,
+        class_time: course_info.data.course_list[0].class_time,
+        classroom: course_info.data.course_list[0].classroom,
+        credit: course_info.data.course_list[0].credit,
         result: '待审核'
       });
       
