@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     // send all requests with /api to the backend
     proxy: {
-      '/api': {
+      '/course_selection': {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
