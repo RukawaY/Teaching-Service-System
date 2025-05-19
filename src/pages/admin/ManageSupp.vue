@@ -9,8 +9,8 @@
       </template>
 
       <el-form :model="formData" label-width="120px" class="input-form">
-        <el-form-item label="课程ID">
-          <el-input v-model.number="formData.courseId" placeholder="请输入课程ID(选填)" type="number" />
+        <el-form-item label="课程名称">
+          <el-input v-model="formData.courseName" placeholder="请输入课程名称(选填)" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="fetchSupplementaryApplications" :loading="loading">
@@ -33,9 +33,7 @@
 
       <el-table :data="applications" style="width: 100%">
         <el-table-column prop="supplement_id" label="申请ID" width="90" />
-        <el-table-column prop="student_id" label="学生ID" width="90" />
         <el-table-column prop="student_name" label="学生姓名" />
-        <el-table-column prop="course_id" label="课程ID" width="90" />
         <el-table-column prop="course_name" label="课程名称" />
         <el-table-column label="审核结果" width="120">
           <template #default="scope">
@@ -77,7 +75,7 @@ import { getSuppApplications, processSupplementary } from '../../api/admin';
 
 // 定义响应式状态
 const formData = reactive({
-  courseId: ''
+  courseName: ''
 });
 
 const loading = ref(false);
@@ -96,12 +94,19 @@ const fetchSupplementaryApplications = async () => {
 
     // 构造查询参数
     const params = {};
-    if (formData.courseId) params.course_id = formData.courseId;
+    if (formData.courseName) params.course_name = formData.courseName;
 
     const response = await getSuppApplications(params);
 
     if (response.code === '200') {
-      applications.value = response.data.supplement_list;
+      // 确保applications对象具有正确的属性，即使API返回的数据结构不同
+      applications.value = response.data.supplement_list.map(item => ({
+        supplement_id: item.supplement_id,
+        student_name: item.student_name,
+        course_name: item.course_name,
+        result: item.result || null
+      }));
+      
       totalApplications.value = applications.value.length;
 
       if (applications.value.length > 0) {
@@ -122,7 +127,7 @@ const fetchSupplementaryApplications = async () => {
 
 // 重置表单
 const resetForm = () => {
-  formData.courseId = '';
+  formData.courseName = '';
   applications.value = [];
 };
 
@@ -136,7 +141,7 @@ const handlePageChange = (page) => {
 const handleApprove = async (application) => {
   try {
     await ElMessageBox.confirm(
-      `确定通过ID为 ${application.supplement_id} 的补选申请吗？`,
+      `确定通过该补选申请吗？学生: ${application.student_name}, 课程: ${application.course_name}`,
       '确认操作',
       {
         confirmButtonText: '确定',
@@ -172,7 +177,7 @@ const handleApprove = async (application) => {
 const handleReject = async (application) => {
   try {
     await ElMessageBox.confirm(
-      `确定拒绝ID为 ${application.supplement_id} 的补选申请吗？`,
+      `确定拒绝该补选申请吗？学生: ${application.student_name}, 课程: ${application.course_name}`,
       '确认操作',
       {
         confirmButtonText: '确定',

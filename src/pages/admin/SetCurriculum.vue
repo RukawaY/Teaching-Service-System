@@ -161,8 +161,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { searchCourseMock } from '../../api/admin';
-import { adminAPI } from '../../api/admin';
+import { adminAPI, searchCourse } from '../../api/admin';
 
 // 表单校验规则
 const rules = {
@@ -256,7 +255,7 @@ const queryCurriculum = async () => {
     const curriculumResponse = await adminAPI.getCurriculum(formData.major_name);
 
     // 获取所有课程列表，使用真实API而不是mock
-    const coursesResponse = await searchCourseMock({});
+    const coursesResponse = await searchCourse({need_available: true});
 
     if (curriculumResponse.code === '200' && coursesResponse.code === '200') {
       // 更新培养方案数据

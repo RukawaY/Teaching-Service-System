@@ -136,6 +136,35 @@ interface CurriculumResponse {
   }
 }
 
+// 课程搜索接口类型
+interface SearchCourseRequest {
+  course_name?: string;
+  teacher_name?: string;
+  course_id?: number;
+  student_id?: number;
+  need_available?: boolean;
+}
+
+interface CourseInfo {
+  course_id: number;
+  course_name: string;
+  teacher_name: string;
+  credit: number;
+  class_time: string;
+  classroom: string;
+  available_capacity?: number;
+  total_capacity?: number;
+  course_description?: string;
+}
+
+interface SearchCourseResponse {
+  code: string;
+  message: string;
+  data: {
+    course_list: CourseInfo[];
+  }
+}
+
 // 处理错误的通用函数
 const handleError = (error: unknown) => {
   if (axios.isAxiosError(error)) {
@@ -151,8 +180,8 @@ const handleError = (error: unknown) => {
 // 获取选课系统时间设置
 export const getTimeSettings = async (): Promise<TimeSettingsResponse> => {
     try {
-        const response = await api.get('/manager/get_time');
-        return response.data;
+        const axiosresponse = await api.get('/course_selection/manager/get_time');
+        return axiosresponse.data;
     } catch (error) {
         handleError(error);
         throw error;
@@ -162,318 +191,69 @@ export const getTimeSettings = async (): Promise<TimeSettingsResponse> => {
 // 更新选课系统时间设置
 export const updateTimeSettings = async (params: UpdateTimeSettingsRequest): Promise<UpdateTimeSettingsResponse> => {
     try {
-        const response = await api.post('/manager/update_time', params);
-        return response.data;
+        const axiosresponse = await api.post('/course_selection/manager/update_time', params);
+        return axiosresponse.data;
     } catch (error) {
         handleError(error);
         throw error;
     }
 };
 
-
-
-// !!!以下是 mock 版本的 getStudentCourses 函数
-export function getStudentCourses(studentId) {
-  console.log('Using mock getStudentCourses for student ID:', studentId);
-
-  // 返回固定的成功响应，使用图片中的课程数据
-  return Promise.resolve({
-    code: '200',
-    message: 'Success',
-    data: {
-      student_name: `学生${studentId}`,
-      course_list: [
-        {
-          course_id: 2,
-          course_name: '线性代数',
-          teacher_name: '李四',
-          credit: 2,
-          class_time: '周二 3-4节',
-          classroom: 'B202',
-        }
-      ]
-    }
-  });
-}
-
-
-
-// !!!!!!!以下是 mock 版本的 adminChooseCourseForStudent 函数
-export function adminChooseCourseForStudent(params) {
-  console.log('Using mock adminChooseCourseForStudent with params:', params);
-
-  // 始终返回成功响应
-  return Promise.resolve({
-    code: '200',
-    message: '选课成功'
-  });
-}
-
-// !!!mock版本的获取补选申请列表函数
-export function getSuppApplications(params) {
-  console.log('Using mock getSuppApplications with params:', params);
-
-  // 构造模拟数据
-  const mockApplications = [
-    {
-      supplement_id: 1,
-      student_id: 1001,
-      student_name: '张三',
-      course_id: 101,
-      course_name: '高等数学',
-      result: null
-    },
-    {
-      supplement_id: 2,
-      student_id: 1002,
-      student_name: '李四',
-      course_id: 102,
-      course_name: '线性代数',
-      result: true
-    },
-    {
-      supplement_id: 3,
-      student_id: 1003,
-      student_name: '王五',
-      course_id: 103,
-      course_name: '计算机网络',
-      result: false
-    },
-    {
-      supplement_id: 4,
-      student_id: 1001,
-      student_name: '张三',
-      course_id: 104,
-      course_name: '数据结构',
-      result: null
-    }
-  ];
-
-  // 过滤数据（根据nage course_id）
-  let filteredApplications = mockApplications;
-
-  if (params && params.course_id) {
-    filteredApplications = filteredApplications.filter(app => app.course_id === params.course_id);
-  }
-
-  return Promise.resolve({
-    code: '200',
-    message: 'Success',
-    data: {
-      supplement_list: filteredApplications
-    }
-  });
-}
-
-// !!!mock版本的处理补选申请函数
-export function processSupplementary(params) {
-  console.log('Using mock processSupplementary with params:', params);
-
-  // 始终返回成功响应
-  return Promise.resolve({
-    code: '200',
-    message: '处理成功'
-  });
-}
-
-/*
-// !!!mock版本的获取专业培养方案函数
-export function getCurriculum(major_name: string) {
-  console.log('Using mock getCurriculum for major:', major_name);
-
-  // 构造不同专业的模拟数据
-  let sections = [];
-
-  switch (major_name.toLowerCase()) {
-    case '计算机科学与技术':
-      sections = [
-        {
-          section_name: '必修课',
-          section_credit: 45,
-          course_list: [
-            { course_name: '高等数学', credit: 5 },
-            { course_name: '线性代数', credit: 3 },
-            { course_name: '离散数学', credit: 3 },
-            { course_name: '数据结构', credit: 4 },
-            { course_name: '计算机组成原理', credit: 4 },
-            { course_name: '操作系统', credit: 4 },
-            { course_name: '编译原理', credit: 3 },
-            { course_name: '计算机网络', credit: 3 }
-          ]
-        },
-        {
-          section_name: '选修课',
-          section_credit: 15,
-          course_list: [
-            { course_name: '人工智能', credit: 3 },
-            { course_name: '机器学习', credit: 3 },
-            { course_name: '并行计算', credit: 2 },
-            { course_name: '软件工程', credit: 3 }
-          ]
-        },
-        {
-          section_name: '实践课程',
-          section_credit: 10,
-          course_list: [
-            { course_name: '程序设计综合实践', credit: 3 },
-            { course_name: '毕业设计', credit: 8 }
-          ]
-        }
-      ];
-      break;
-
-    case '软件工程':
-      sections = [
-        {
-          section_name: '必修课',
-          section_credit: 40,
-          course_list: [
-            { course_name: '高等数学', credit: 5 },
-            { course_name: '线性代数', credit: 3 },
-            { course_name: '软件工程', credit: 4 },
-            { course_name: '数据结构', credit: 4 },
-            { course_name: 'Java程序设计', credit: 3 },
-            { course_name: '数据库系统', credit: 4 }
-          ]
-        },
-        {
-          section_name: '选修课',
-          section_credit: 20,
-          course_list: [
-            { course_name: 'Web开发', credit: 3 },
-            { course_name: '移动应用开发', credit: 3 },
-            { course_name: '软件测试', credit: 2 },
-            { course_name: '软件项目管理', credit: 3 },
-            { course_name: '需求工程', credit: 2 }
-          ]
-        }
-      ];
-      break;
-
-    case '人工智能':
-      sections = [
-        {
-          section_name: '必修课',
-          section_credit: 35,
-          course_list: [
-            { course_name: '高等数学', credit: 5 },
-            { course_name: '线性代数', credit: 3 },
-            { course_name: '概率论与统计', credit: 3 },
-            { course_name: '人工智能基础', credit: 4 },
-            { course_name: '机器学习', credit: 4 },
-            { course_name: '深度学习', credit: 4 }
-          ]
-        },
-        {
-          section_name: '选修课',
-          section_credit: 15,
-          course_list: [
-            { course_name: '自然语言处理', credit: 3 },
-            { course_name: '计算机视觉', credit: 3 },
-            { course_name: '强化学习', credit: 3 },
-            { course_name: '机器人学', credit: 3 }
-          ]
-        },
-        {
-          section_name: '实践课程',
-          section_credit: 12,
-          course_list: [
-            { course_name: '人工智能实验', credit: 4 },
-            { course_name: '毕业设计', credit: 8 }
-          ]
-        }
-      ];
-      break;
-
-    default:
-      // 默认返回一些基础课程
-      sections = [
-        {
-          section_name: '必修课',
-          section_credit: 20,
-          course_list: [
-            { course_name: '高等数学', credit: 5 },
-            { course_name: '线性代数', credit: 3 },
-            { course_name: '大学物理', credit: 4 }
-          ]
-        },
-        {
-          section_name: '选修课',
-          section_credit: 10,
-          course_list: [
-            { course_name: '大学英语', credit: 2 },
-            { course_name: '创新创业基础', credit: 1 }
-          ]
-        }
-      ];
-  }
-
-  return Promise.resolve({
-    code: '200',
-    message: 'Success',
-    data: {
-      major_name: major_name,
-      sections: sections
-    }
-  });
-}
-
-// !!!mock版本的设置专业培养方案函数
-export function setCurriculum(params: CurriculumRequest) {
-  console.log('Using mock setCurriculum with data:', JSON.stringify(params, null, 2));
-
-  // 验证必要的参数
-  if (!params.major_name) {
-    return Promise.resolve({
-      code: '400',
-      message: '缺少专业名称参数'
+// 获取学生已选课程
+export const getStudentCourses = async (studentId: number): Promise<StudentCoursesResponse> => {
+  try {
+    const axiosresponse = await api.get('/course_selection/student/show_selected_courses', {
+      params: { student_id: studentId }
     });
+    return axiosresponse.data;
+  } catch (error) {
+    handleError(error);
+    throw error;
   }
+};
 
-  if (!params.sections || params.sections.length === 0) {
-    return Promise.resolve({
-      code: '400',
-      message: '培养方案必须包含至少一个模块'
+
+
+// 管理员为学生手动选课
+export const adminChooseCourseForStudent = async (params: AdminChooseCourseRequest): Promise<AdminChooseCourseResponse> => {
+  try {
+    const axiosresponse = await api.post('/course_selection/manager/choose_course', params);
+    return axiosresponse.data;
+  } catch (error) {
+    handleError(error);
+    throw error;
+  }
+};
+
+// 补选申请相关接口
+export const getSuppApplications = async (params: { course_name?: string }): Promise<GetSuppApplicationsResponse> => {
+  try {
+    const axiosresponse = await api.get('/course_selection/manager/get_supplement', {
+      params: params
     });
+        // 确保返回的数据结构与之前的mock数据结构一致
+    return axiosresponse.data;
+  } catch (error) {
+    handleError(error);
+    throw error;
   }
+};
 
-  // 验证每个模块是否都有名称和课程
-  const invalidSections = params.sections.filter(section => !section.section_name);
-  if (invalidSections.length > 0) {
-    return Promise.resolve({
-      code: '400',
-      message: '存在未命名的模块'
-    });
+// 处理补选申请
+export const processSupplementary = async (params: ProcessSuppRequest): Promise<ProcessSuppResponse> => {
+  try {
+    const response = await api.post('/course_selection/manager/process_supplement', params);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    throw error;
   }
-
-  // 验证课程学分是否达标
-  const invalidCreditSections = params.sections.filter(section => {
-    const totalCredit = section.course_list.reduce((sum, course) => sum + Number(course.credit), 0);
-    return totalCredit < section.section_credit;
-  });
-
-  if (invalidCreditSections.length > 0) {
-    const sectionNames = invalidCreditSections.map(s => s.section_name).join(', ');
-    return Promise.resolve({
-      code: '400',
-      message: `以下模块学分未达到要求: ${sectionNames}`
-    });
-  }
-
-  // 模拟保存成功
-  return Promise.resolve({
-    code: '200',
-    message: `专业 "${params.major_name}" 培养方案设置成功`
-  });
-}
-*/
-
-
+};
 
 // 获取专业培养方案
 export const getCurriculum = async (major_name: string): Promise<CurriculumResponse> => {
   try {
-    const response = await api.get('/get_curriculum', {
+    const response = await api.get('/course_selection/get_curriculum', {
       params: { major_name }
     });
     return response.data;
@@ -486,7 +266,18 @@ export const getCurriculum = async (major_name: string): Promise<CurriculumRespo
 // 设置专业培养方案
 export const setCurriculum = async (params: CurriculumRequest): Promise<{ code: string; message: string }> => {
   try {
-    const response = await api.post('/manager/set_curriculum', params);
+    const response = await api.post('/course_selection/manager/set_curriculum', params);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    throw error;
+  }
+};
+
+// 课程搜索API实现
+export const searchCourse = async (params: SearchCourseRequest): Promise<SearchCourseResponse> => {
+  try {
+    const response = await api.get('/course_selection/search_course', { params });
     return response.data;
   } catch (error) {
     handleError(error);
@@ -495,61 +286,6 @@ export const setCurriculum = async (params: CurriculumRequest): Promise<{ code: 
 };
 
 
-//!!!!!!!!!!!!!! 为了测试admin/ManualChoose.vue 的Mock版本api响应函数
-// 添加 mock 版本的 searchCourse 函数
-export function searchCourseMock(params) {
-  console.log('Using mock searchCourse with params:', params);
-
-  return Promise.resolve({
-    code: '200',
-    message: 'Success',
-    data: {
-      course_list: [
-        {
-          course_id: 1,
-          course_name: '高等数学',
-          teacher_name: '张三',
-          credit: 3,
-          class_time: '周一 1-2节',
-          classroom: 'A101',
-        },
-        {
-          course_id: 3,
-          course_name: '大学物理',
-          teacher_name: '王五',
-          credit: 4,
-          class_time: '周三 5-6节',
-          classroom: 'C303',
-          available_capacity: 35,
-          total_capacity: 50,
-          course_description: '大学物理是理工科学生必修的基础课程之一'
-        },
-        {
-          course_id: 4,
-          course_name: '数据结构',
-          teacher_name: '赵六',
-          credit: 3,
-          class_time: '周四 1-2节',
-          classroom: 'D404',
-          available_capacity: 25,
-          total_capacity: 40,
-          course_description: '数据结构是计算机专业核心课程'
-        },
-        {
-          course_id: 5,
-          course_name: '计算机网络',
-          teacher_name: '钱七',
-          credit: 3,
-          class_time: '周一 1-2节',
-          classroom: 'E505',
-          available_capacity: 30,
-          total_capacity: 45,
-          course_description: '计算机网络是计算机科学与技术专业的专业基础课'
-        }
-      ]
-    }
-  });
-}
 
 // 管理员端API
 export const adminAPI = {
@@ -561,4 +297,5 @@ export const adminAPI = {
   processSupplementary,
   getCurriculum,
   setCurriculum,
+  searchCourse,
 };

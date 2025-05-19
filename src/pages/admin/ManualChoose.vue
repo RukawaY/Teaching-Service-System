@@ -71,9 +71,7 @@
 <script setup>
 import { ref, computed, reactive } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { getStudentCourses, adminChooseCourseForStudent } from '../../api/admin';
-//import { searchCourse } from '../../api/student';  // 从student.ts导入searchCourse函数
-import { searchCourseMock } from '../../api/admin'; // 从admin.ts导入searchCourse函数
+import { getStudentCourses, adminChooseCourseForStudent, searchCourse } from '../../api/admin';
 
 const formData = reactive({
   studentId: '',
@@ -141,12 +139,9 @@ const fetchAvailableCourses = async () => {
     courseLoading.value = true;
 
     // 使用 searchCourse API 获取可选课程列表
-    const response = await searchCourseMock({
+    const response = await searchCourse({
       need_available: true
-    }); //!!!!!!!!!正常应该是用student.ts的searchCourse函数，现在是测试所以弄了个Mock版本
-    // const response = await searchCourse({
-    //   need_available: true
-    // });
+    });
 
     if (response.code === '200') {
       // 过滤掉学生已选的课程
