@@ -86,7 +86,7 @@ const courseLoading = ref(false);
 
 // 检查时间冲突
 const isTimeConflict = (course) => {
-  return selectedCourses.value.some(selected =>
+  return selectedCourses.value.length > 0 && selectedCourses.value.some(selected =>
     selected.class_time === course.class_time
   );
 };
@@ -97,6 +97,13 @@ const searchStudentCourses = async () => {
     ElMessage.warning('请输入学生ID');
     return;
   }
+  else
+  {
+    studentInfo.value = {
+      studentId: formData.studentId,
+      name: ''
+    }
+  }
 
   try {
     loading.value = true;
@@ -105,24 +112,26 @@ const searchStudentCourses = async () => {
     const response = await getStudentCourses(formData.studentId);
 
     if (response.code === '200') {
-      // 设置学生信息
-      studentInfo.value = {
-        id: formData.studentId,
-        name: response.data.student_name,
-      };
+      // 更新学生姓名
+      studentInfo.value.name = response.data.student_name;
 
-      // 设置已选课程
-      selectedCourses.value = response.data.course_list;
-      // 在控制台输出已选课程信息
-      console.log('学生已选课程:', selectedCourses.value);
+      // 设置已选课程，确保不是null
+      selectedCourses.value = response.data.course_list || [];
 
-      // 获取可选课程
-      await fetchAvailableCourses();
-
-      ElMessage.success('获取学生信息成功');
+      ElMessage.success('获取学生选课信息成功');
     } else {
-      ElMessage.error(response.message || '获取学生信息失败');
-      studentInfo.value = null;
+      ElMessage.error(response.message || '获取学生选课信息失败');
+      // 设置为空数组，而不是包含空对象的数组
+      selectedCourses.value = [];
+    }
+    
+    // 无论如何都尝试获取可选课程
+    try {
+      await fetchAvailableCourses();
+      ElMessage.success('获取可选课程成功');
+    } catch (error) {
+      console.error('获取可选课程失败:', error);
+      ElMessage.error('获取可选课程失败');
     }
   } catch (error) {
     ElMessage.error('获取学生信息失败');
@@ -146,11 +155,16 @@ const fetchAvailableCourses = async () => {
     });
 
     if (response.code === '200') {
-      // 过滤掉学生已选的课程
-      const selectedIds = selectedCourses.value.map(c => c.course_id);
-      availableCourses.value = response.data.course_list.filter(
-        course => !selectedIds.includes(course.course_id)
-      );
+      // 确保 selectedCourses.value 不是 null，并安全地过滤掉学生已选的课程
+      if (!selectedCourses.value || selectedCourses.value.length === 0) { 
+        availableCourses.value = response.data.course_list;
+      } 
+      else{
+        const selectedIds = selectedCourses.value.map(c => c.course_id);
+        availableCourses.value = response.data.course_list.filter(
+          course => !selectedIds.includes(course.course_id)
+        );
+      }
     } else {
       ElMessage.warning(response.message || '获取可选课程失败');
     }
