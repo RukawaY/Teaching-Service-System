@@ -86,7 +86,7 @@ const courseLoading = ref(false);
 
 // 检查时间冲突
 const isTimeConflict = (course) => {
-  return selectedCourses.value.length > 0 && selectedCourses.value.some(selected =>
+  return selectedCourses.value && selectedCourses.value.length > 0 && selectedCourses.value.some(selected =>
     selected.class_time === course.class_time
   );
 };
@@ -116,8 +116,8 @@ const searchStudentCourses = async () => {
       studentInfo.value.name = response.data.student_name;
 
       // 设置已选课程，确保不是null
-      selectedCourses.value = response.data.course_list || [];
-
+      selectedCourses.value = response.data.course_list;
+      
       ElMessage.success('获取学生选课信息成功');
     } else {
       ElMessage.error(response.message || '获取学生选课信息失败');
