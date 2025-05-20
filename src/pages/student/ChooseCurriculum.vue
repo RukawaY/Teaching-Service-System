@@ -74,37 +74,7 @@ const formData = reactive({
 const loading = ref(false);
 const submitting = ref(false);
 // 添加一些测试用例
-const curriculumData = ref({
-  major_name: '计算机科学与技术',
-  sections: [
-    {
-      section_name: '必修课',
-      section_credit: 10,
-      course_list: [
-        {course_name: "高等数学", credit: 3},
-        {course_name: "线性代数", credit: 2},
-        {course_name: "概率论与数理统计", credit: 2},
-        {course_name: "离散数学", credit: 2},
-        {course_name: "数据结构", credit: 2},
-        {course_name: "操作系统", credit: 2},
-        {course_name: "计算机网络", credit: 2},
-        {course_name: "数据库系统", credit: 2},
-      ]
-    },
-    {
-      section_name: '选修课',
-      section_credit: 10,
-      course_list: [
-        {course_name: "人工智能", credit: 2},
-        {course_name: "软件工程", credit: 2},
-        {course_name: "计算机图形学", credit: 2},
-        {course_name: "计算机系统结构", credit: 2},
-        {course_name: "计算机系统安全", credit: 2},
-        {course_name: "计算机系统安全", credit: 2},   
-      ]
-    }
-  ]
-});
+const curriculumData = ref();
 const selectedCourses = ref({});
 const showEmpty = computed(() => !loading.value && !curriculumData.value);
 
@@ -189,9 +159,9 @@ const submitCurriculum = async () => {
     submitting.value = true;
     
     // 准备提交数据
-    const sectionsToSubmit = curriculumData.value.sections.map(section => {
+    const sectionsToSubmit = curriculumData.value.sections.map((section, sectionIndex) => {
       const selectedCourseList = section.course_list.filter((_, courseIndex) => 
-        selectedCourses.value[`${section.section_name}-${courseIndex}`]
+        selectedCourses.value[`${sectionIndex}-${courseIndex}`]
       );
       
       return {
@@ -206,6 +176,8 @@ const submitCurriculum = async () => {
       major_name: curriculumData.value.major_name,
       sections: sectionsToSubmit
     };
+
+    console.log(submitData);
     
     const response = await setPersonalCurriculum(submitData);
     
@@ -280,7 +252,7 @@ const submitCurriculum = async () => {
 }
 
 .curriculum-card {
-  width: 85%;
+  width: 65%;
   margin: 0 auto;
 }
 </style>

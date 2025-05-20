@@ -38,7 +38,7 @@
       </template>
 
       <el-table :data="courseList" style="font-size: 15px;">
-        <el-table-column prop="course_id" label="课程ID" width="90" />
+        <el-table-column prop="course_id" label="开课ID" width="90" />
         <el-table-column prop="course_name" label="课程名称" />
         <el-table-column prop="teacher_name" label="授课教师" />
         <el-table-column prop="credit" label="学分" width="80" />
@@ -106,41 +106,7 @@ const formData = reactive({
 
 const loading = ref(false);
 // 添加一些测试数据
-const courseList = ref([
-  {
-    course_id: 1,
-    course_name: '高等数学',
-    teacher_name: '张三',
-    credit: 3,
-    class_time: '周一 1-2节',
-    classroom: 'A101',
-    available_capacity: 30,
-    total_capacity: 50,
-    course_description: '高等数学是大学数学的基础课程，主要内容包括极限、导数、积分等。'
-  },
-  {
-    course_id: 2,
-    course_name: '线性代数',
-    teacher_name: '李四',
-    credit: 2,
-    class_time: '周二 3-4节',
-    classroom: 'B202',
-    available_capacity: 25,
-    total_capacity: 40,
-    course_description: '线性代数是大学数学的重要课程，主要内容包括向量、矩阵、线性方程组等。'
-  },
-  {
-    course_id: 3,
-    course_name: '概率论与数理统计',
-    teacher_name: '王五',
-    credit: 3,
-    class_time: '周三 5-6节',
-    classroom: 'C303',
-    available_capacity: 35,
-    total_capacity: 50,
-    course_description: '概率论与数理统计是大学数学的重要课程，主要内容包括概率论、数理统计等。'
-  }
-]);
+const courseList = ref([]);
 const searchPerformed = ref(false);
 const dialogVisible = ref(false);
 const selectedCourse = ref(null);
