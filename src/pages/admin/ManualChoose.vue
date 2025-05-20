@@ -116,7 +116,7 @@ const searchStudentCourses = async () => {
       studentInfo.value.name = response.data.student_name;
 
       // 设置已选课程，确保不是null
-      selectedCourses.value = response.data.course_list;
+      selectedCourses.value = response.data.course_list || [];
       
       ElMessage.success('获取学生选课信息成功');
     } else {
