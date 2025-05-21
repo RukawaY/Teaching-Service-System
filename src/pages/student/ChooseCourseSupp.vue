@@ -113,8 +113,6 @@ const refreshApplications = async () => {
   try {
     refreshing.value = true;
     const response = await getSuppResult(formData.student_id);
-
-    console.log(response);
     
     if (response.code === '200') {
       // 先清空applications.value
@@ -124,7 +122,7 @@ const refreshApplications = async () => {
         // 先添加到applications.value中
         applications.value.push({
           student_id: formData.student_id,
-          section_id: response.data.result_list[i].section_id,
+          section_id: response.data.result_list[i].course_id,
           course_name: response.data.result_list[i].course_name,
           teacher_name: response.data.result_list[i].teacher_name,
           class_time: response.data.result_list[i].class_time,
