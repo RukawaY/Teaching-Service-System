@@ -41,7 +41,7 @@ import { getStudentSelectedCourses, dropStudentCourse } from '../../api/student.
 // import type { detailedCourseInfo, StudentCourseActionPayload } from '../../api/student.ts';
 
 
-const studentId = 1; // TODO: 实际项目请从登录信息获取
+const studentId = 2; // TODO: 实际项目请从登录信息获取
 
 const selectedCourses = ref([]); // 将持有: Array<detailedCourseInfo & { dropping?: boolean }>
 const loading = ref(false);
