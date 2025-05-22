@@ -75,7 +75,7 @@
       <div v-if="selectedCourse" class="course-details">
         <h3>{{ selectedCourse.course_name }}</h3>
         <el-descriptions :column="3">
-          <el-descriptions-item label="课程 ID">{{ selectedCourse.course_id }}</el-descriptions-item>
+          <el-descriptions-item label="开课 ID">{{ selectedCourse.course_id }}</el-descriptions-item>
           <el-descriptions-item label="授课教师">{{ selectedCourse.teacher_name }}</el-descriptions-item>
           <el-descriptions-item label="课程学分">{{ selectedCourse.credit }}</el-descriptions-item>
           <el-descriptions-item label="上课时间">{{ selectedCourse.class_time }}</el-descriptions-item>

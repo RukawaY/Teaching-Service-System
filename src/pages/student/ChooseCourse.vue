@@ -74,9 +74,22 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 import { searchCourse } from '../../api/student.ts';
+import { selectionStatus, useSelectionPermit } from '../../api/selectionPermit.ts';
+
+const API_BASE_URL = 'http://localhost:8080';
+const api = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+const router = useRouter();
 
 const courseList = ref([
   {
@@ -154,6 +167,28 @@ const courseList = ref([
 const selectedCourses = ref({});
 const submitting = ref(false);
 
+// 学生ID (从登录信息获取)
+const studentId = 10001; // TODO: 实际项目请从登录信息获取
+
+// 处理选课权限获取失败
+const handlePermitFailed = (errorMsg) => {
+  console.log(`[选课] 选课权限获取失败，重定向回首页: ${errorMsg}`);
+  
+  // 过滤掉"操作成功"的错误消息，只有真正的错误才跳转
+  if (errorMsg && errorMsg !== '操作成功') {
+    ElMessage.warning(errorMsg);
+    // 延迟一下再跳转，让用户能看到消息
+    setTimeout(() => {
+      router.push('/home');
+    }, 1500);
+  } else {
+    console.log('[选课] 收到"操作成功"消息但权限获取失败，忽略跳转');
+  }
+};
+
+// 自动处理选课权限
+const permitHandler = useSelectionPermit(studentId, handlePermitFailed);
+
 // 搜索条件
 const searchQuery = ref({
   course_name: '',
@@ -195,10 +230,16 @@ const canSubmit = computed(() => {
   return Object.values(selectedCourses.value).some((isSelected) => isSelected);
 });
 
-const studentId = 10001; // TODO: 实际项目请从登录信息获取
-
 // 提交选课
 const submitCourses = async () => {
+  console.log('[选课] 开始提交选课...');
+  
+  if (!permitHandler.hasPermit()) {
+    console.warn('[选课] 没有选课权限，无法提交选课');
+    ElMessage.warning('系统繁忙，请稍后再试');
+    return;
+  }
+
   try {
     await ElMessageBox.confirm('确定要提交选课结果吗？', '提示', {
       confirmButtonText: '确定',
@@ -211,32 +252,43 @@ const submitCourses = async () => {
     const selectedCourseIds = Object.keys(selectedCourses.value).filter(
       (courseId) => selectedCourses.value[courseId]
     );
+    
+    console.log(`[选课] 选中的课程ID: ${selectedCourseIds.join(', ')}`);
 
     // 遍历每个选中的课程，依次调用后端接口
     for (const courseId of selectedCourseIds) {
-      const res = await fetch('/choose_course', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      console.log(`[选课] 正在选课: 课程ID ${courseId}`);
+      try {
+        const response = await api.post(`/course_selection/student/choose_course`, {
           student_id: studentId,
           course_id: Number(courseId),
-        }),
-      });
-      const data = await res.json();
-      if (data.code !== 'success') {
-        ElMessage.error(`课程ID ${courseId} 选课失败: ${data.message}`);
+        });
+        
+        if (response.data.code === "200" || response.data.code === 200) {
+          console.log(`[选课] 课程ID ${courseId} 选课成功`);
+        } else {
+          console.error(`[选课] 课程ID ${courseId} 选课失败: ${response.data.message}`);
+          ElMessage.error(`课程ID ${courseId} 选课失败: ${response.data.message}`);
+          submitting.value = false;
+          return;
+        }
+      } catch (error) {
+        console.error(`[选课] 课程ID ${courseId} 选课请求失败:`, error);
+        ElMessage.error(`选课请求失败，请检查网络连接`);
         submitting.value = false;
         return;
       }
     }
 
+    console.log('[选课] 所有课程选课成功');
     ElMessage.success('选课提交成功');
+    selectedCourses.value = {}; // 清空已选课程
   } catch (error) {
     if (error !== 'cancel') {
+      console.error('[选课] 选课提交失败:', error);
       ElMessage.error('选课提交失败');
-      console.error(error);
+    } else {
+      console.log('[选课] 用户取消了选课操作');
     }
   } finally {
     submitting.value = false;
@@ -245,11 +297,13 @@ const submitCourses = async () => {
 
 // 过滤课程
 const filterCourses = () => {
+  console.log('[选课] 过滤课程:', searchQuery.value);
   // 触发 filteredCourses 的重新计算
 };
 
 // 重置搜索条件
 const resetSearch = () => {
+  console.log('[选课] 重置搜索条件');
   searchQuery.value = {
     course_name: '',
     teacher_name: '',
@@ -257,6 +311,20 @@ const resetSearch = () => {
     onlyAvailable: false,
   };
 };
+
+// 页面加载和卸载日志
+onMounted(() => {
+  console.log('[选课页面] 页面已加载');
+  
+  // 检查是否有选课权限，如果没有就跳转回首页
+  if (!permitHandler.hasPermit() && permitHandler.getErrorMessage()) {
+    handlePermitFailed(permitHandler.getErrorMessage());
+  }
+});
+
+onUnmounted(() => {
+  console.log('[选课页面] 页面已卸载');
+});
 </script>
 
 <style scoped>
