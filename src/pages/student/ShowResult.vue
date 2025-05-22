@@ -1,14 +1,33 @@
 <template>
   <div class="show-result container">
-    <el-card class="result-card" v-loading="loading">
+    <el-card class="result-card">
       <template #header>
         <div class="card-header">
           <h2>选课结果</h2>
-          <p>以下是您已选的课程列表</p>
         </div>
       </template>
 
-      <el-table :data="selectedCourses" style="font-size: 15px;">
+      <el-form inline class="id-input-form" @submit.prevent="fetchSelectedCourses">
+        <el-form-item label="学生ID:">
+          <el-input
+            v-model.number="studentId"
+            placeholder="请输入学生ID查看结果"
+            type="number"
+            style="width: 250px; margin-right: 10px;"
+            @keyup.enter="fetchSelectedCourses"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="fetchSelectedCourses" :loading="loading">
+            查看选课结果
+          </el-button>
+        </el-form-item>
+      </el-form>
+      <p v-if="!loading && selectedCourses.length > 0" style="text-align: center; margin-bottom: 15px;">
+        以下是ID为 <strong>{{ currentFetchedId }}</strong> 的学生已选课程列表
+      </p>
+
+      <el-table :data="selectedCourses" style="font-size: 15px;" v-loading="loading">
         <el-table-column prop="course_id" label="课程ID" width="120" />
         <el-table-column prop="course_name" label="课程名称" />
         <el-table-column prop="teacher_name" label="授课教师" />
@@ -27,7 +46,8 @@
         </el-table-column>
       </el-table>
 
-      <el-empty v-if="!loading && selectedCourses.length === 0" description="暂无选课结果" />
+      <el-empty v-if="!loading && selectedCourses.length === 0 && hasFetched" description="该学生暂无选课结果或ID不存在" />
+      <el-empty v-if="!loading && !hasFetched" description="请输入学生ID并点击查看" />
     </el-card>
   </div>
 </template>
@@ -35,101 +55,110 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-// 从 student.ts 导入你的实际API函数
-import { getStudentSelectedCourses, dropStudentCourse } from '../../api/student.ts'; // 如果需要，调整路径
-// 假设 detailedCourseInfo 和 StudentCourseActionPayload 也可能对类型定义有用
-// import type { detailedCourseInfo, StudentCourseActionPayload } from '../../api/student.ts';
+import { getStudentSelectedCourses, dropStudentCourse } from '../../api/student.ts'; //
 
-
-const studentId = 2; // TODO: 实际项目请从登录信息获取
-
-const selectedCourses = ref([]); // 将持有: Array<detailedCourseInfo & { dropping?: boolean }>
+const studentId = ref(''); // 修改点：初始化为空
+const currentFetchedId = ref(''); // 用于显示当前查询的是哪个ID的结果
+const selectedCourses = ref([]);
 const loading = ref(false);
+const hasFetched = ref(false); // 标记是否已执行过至少一次查询
 
-// 获取选课结果
 const fetchSelectedCourses = async () => {
+  if (!studentId.value) {
+    ElMessage.warning('请输入学生ID');
+    selectedCourses.value = []; // 清空之前的结果
+    hasFetched.value = false;
+    return;
+  }
   loading.value = true;
+  hasFetched.value = true;
+  currentFetchedId.value = studentId.value; // 记录当前查询的ID
   try {
-    // API期望 student_id 是一个数字
-    const response = await getStudentSelectedCourses(Number(studentId));
-    if (response.code === '200' || response.code === 200) { // 检查你后端实际的成功代码
+    const response = await getStudentSelectedCourses(Number(studentId.value)); //
+    if (response.code === '200' || response.code === 200) { //
       if (response.data && response.data.course_list) {
-        selectedCourses.value = response.data.course_list.map(course => ({ ...course, dropping: false }));
+        selectedCourses.value = response.data.course_list.map(course => ({ ...course, dropping: false })); //
       } else {
-        selectedCourses.value = [];
+        selectedCourses.value = []; //
       }
     } else {
       ElMessage.error(response.message || '获取选课结果失败');
-      selectedCourses.value = []; // 出错时清空列表
+      selectedCourses.value = []; //
     }
   } catch (e) {
     ElMessage.error(e.message || '获取选课结果时发生网络错误');
-    selectedCourses.value = []; // 出错时清空列表
-    console.error("获取已选课程时出错:", e);
+    selectedCourses.value = []; //
+    console.error("获取已选课程时出错:", e); //
   } finally {
     loading.value = false;
   }
 };
 
-// 退课功能
 const handleDropCourse = async (course) => {
+  if (!currentFetchedId.value) { // 确保是在有已查询学生ID的上下文进行退课
+      ElMessage.error('请先查询学生选课结果后再进行退课操作。');
+      return;
+  }
   try {
     await ElMessageBox.confirm(
-      `确定要退选课程「${course.course_name}」吗？`,
+      `确定要为学生ID ${currentFetchedId.value} 退选课程「${course.course_name}」吗？`,
       '提示',
       { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
     );
-
-    course.dropping = true; // 为特定按钮设置加载状态
+    course.dropping = true; //
 
     const payload = {
-      student_id: Number(studentId),
-      course_id: Number(course.course_id) // 确保 course_id 是数字
+      student_id: Number(currentFetchedId.value), // 使用当前已查询的学生ID
+      course_id: Number(course.course_id) 
     };
-    
-    const response = await dropStudentCourse(payload);
+    const response = await dropStudentCourse(payload); //
 
-    if (response.code === '200' || response.code === 200 || response.code === 'success') { // 检查你后端的成功代码
+    if (response.code === '200' || response.code === 200 || response.code === 'success') { //
       ElMessage.success(`课程「${course.course_name}」退课成功`);
-      fetchSelectedCourses(); // 刷新已选课程列表
+      fetchSelectedCourses(); //
     } else {
-      ElMessage.error(response.message || '退课失败');
+      ElMessage.error(response.message || '退课失败'); //
     }
   } catch (e) {
-    if (e !== 'cancel' && e !== 'close') { // 如果 ElMessageBox 是通过 'Esc' 或 'x' 关闭的，可能是 'close'
+    if (e !== 'cancel' && e !== 'close') {
       ElMessage.error(e.message || '退课操作失败');
-      console.error("退课时出错:", e);
+      console.error("退课时出错:", e); //
     }
   } finally {
-    if (course) { // 检查 course 是否仍然存在 (如果组件在异步操作期间被卸载，可能不存在)
-       course.dropping = false; // 重置按钮的加载状态
+    if (course) { 
+       course.dropping = false; //
     }
   }
 };
 
-onMounted(() => {
-  fetchSelectedCourses();
-});
+// 页面加载时不再自动获取，等待用户输入ID
+// onMounted(() => {
+//   fetchSelectedCourses();
+// });
 </script>
 
 <style scoped>
+/* 在现有样式基础上添加 */
+.id-input-form {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center; /* 让表单内容居中 */
+  align-items: center;
+}
 .show-result {
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0 auto; /* */
   padding: 20px;
 }
-
 .container {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
 .result-card {
   width: 95%;
-  margin: 0px auto 20px auto;
+  margin: 0px auto 20px auto; /* */
 }
-
 .card-header {
   display: flex;
   flex-direction: column;

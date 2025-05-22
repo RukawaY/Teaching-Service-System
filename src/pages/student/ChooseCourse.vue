@@ -8,6 +8,18 @@
         </div>
       </template>
 
+      <el-form inline class="id-input-form" @submit.prevent>
+        <el-form-item label="学生ID:">
+          <el-input
+            v-model.number="studentId"
+            placeholder="请输入学生ID"
+            type="number"
+            style="width: 200px; margin-right: 10px;"
+            @keyup.enter="studentIdEntered"
+          />
+           <el-button @click="studentIdEntered">确认ID (用于提交)</el-button>
+        </el-form-item>
+      </el-form>
       <div class="search-bar">
         <el-input
           v-model="searchQuery.course_name"
@@ -73,32 +85,34 @@
 </template>
 
 <script setup>
-// ChooseCourse.vue 的 <script setup> 部分
-
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-
-// 关键：确保从你的 API 文件中导入真实的 API 调用函数
-// 这些函数负责与你的后端进行通信，后端再与数据库交互
 import { searchCourse, submitStudentCourseSelection } from '../../api/student.ts';
-// 假设 submitStudentCourseSelection 是你在 student.ts 中为 POST /student/choose_course 实现的函数
 
 const courseList = ref([]);
-const selectedCourses = ref({}); // { course_id: boolean }
+const selectedCourses = ref({});
 const submitting = ref(false);
-const loading = ref(false); // 用于表格和搜索按钮的加载状态
+const loading = ref(false);
 
-// 搜索条件
 const searchQuery = ref({
   course_name: '',
   teacher_name: '',
   course_id: '',
-  need_available: false, // API 中的 need_available 对应此项
+  need_available: false,
 });
 
-const studentId = 2; // TODO: 实际项目请从登录信息获取
+// 将 studentId 初始化为空字符串，以便输入框显示 placeholder
+const studentId = ref(''); // 修改点：不再写死，改为空字符串或 null
 
-// 获取课程列表的函数 (调用 student.ts 中的 searchCourse)
+// 提醒用户输入ID的函数
+const studentIdEntered = () => {
+  if (!studentId.value) {
+    ElMessage.info('请输入学生ID以便进行选课提交。');
+  } else {
+    ElMessage.success(`学生ID已确认为: ${studentId.value}。现在可以进行选课提交。`);
+  }
+};
+
 const fetchCourses = async () => {
   loading.value = true;
   try {
@@ -107,20 +121,20 @@ const fetchCourses = async () => {
     if (searchQuery.value.teacher_name) paramsToApi.teacher_name = searchQuery.value.teacher_name;
     if (searchQuery.value.course_id) paramsToApi.course_id = Number(searchQuery.value.course_id);
     if (searchQuery.value.need_available) paramsToApi.need_available = searchQuery.value.need_available;
-    // 如果API支持，也可以加入 student_id: paramsToApi.student_id = studentId;
+    
+    // 选课页面的课程搜索API通常不需要student_id，除非API支持根据学生培养方案过滤可选课程
+    // 如果你的 searchCourse API 需要 student_id, 在这里添加:
+    // if (studentId.value) paramsToApi.student_id = Number(studentId.value);
 
-    // 调用从 student.ts 导入的真实 API 函数
     const response = await searchCourse(paramsToApi);
-
-    // 假设后端返回的数据结构如你之前API文档所示
-    if (response && response.code === '200' && response.data && response.data.course_list) { // 请根据后端实际的成功 code调整
+    if (response && response.code === '200' && response.data && response.data.course_list) {
       courseList.value = response.data.course_list;
     } else {
       ElMessage.error(response.message || '获取课程列表失败');
       courseList.value = [];
     }
   } catch (error) {
-    ElMessage.error('请求课程列表时发生网络错误');
+    ElMessage.error(error.message || '请求课程列表时发生网络错误');
     console.error('Error fetching courses:', error);
     courseList.value = [];
   } finally {
@@ -128,17 +142,14 @@ const fetchCourses = async () => {
   }
 };
 
-// 组件挂载后立即获取所有课程
 onMounted(() => {
   fetchCourses();
 });
 
-// 点击搜索按钮的处理函数
 const handleSearch = () => {
   fetchCourses();
 };
 
-// 重置搜索条件
 const resetSearch = () => {
   searchQuery.value = {
     course_name: '',
@@ -150,13 +161,15 @@ const resetSearch = () => {
 };
 
 const showEmpty = computed(() => !loading.value && courseList.value.length === 0);
-
 const canSubmit = computed(() => {
   return Object.values(selectedCourses.value).some((isSelected) => isSelected);
 });
 
-// 提交选课 (调用 student.ts 中的 submitStudentCourseSelection)
 const submitCourses = async () => {
+  if (!studentId.value) { // 修改点：检查 studentId 是否已输入
+    ElMessage.error('请先输入并确认学生ID再提交选课！');
+    return;
+  }
   if (!canSubmit.value) {
     ElMessage.warning('请至少选择一门课程');
     return;
@@ -168,31 +181,25 @@ const submitCourses = async () => {
       cancelButtonText: '取消',
       type: 'warning',
     });
-
     submitting.value = true;
     let allSubmittedSuccessfully = true;
     let errorMessages = [];
-
     const selectedCourseIds = Object.keys(selectedCourses.value).filter(
       (courseId) => selectedCourses.value[courseId]
     );
-
     for (const courseId of selectedCourseIds) {
       try {
-        // 调用从 student.ts 导入的真实 API 函数
         const response = await submitStudentCourseSelection({
-          student_id: studentId,
+          student_id: Number(studentId.value), // 修改点：使用 ref 的 value
           course_id: Number(courseId),
         });
-
-        // 根据你的API实际返回的成功代码调整
-        if (response && response.code !== '200' && response.code !== 'success') { // 假设 '200' 或 'success' 为成功
+        if (response && response.code !== '200' && response.code !== 'success') {
           allSubmittedSuccessfully = false;
           errorMessages.push(`课程ID ${courseId}: ${response.message || '选课失败'}`);
         }
       } catch (err) {
         allSubmittedSuccessfully = false;
-        errorMessages.push(`课程ID ${courseId}: 提交时发生网络错误`);
+        errorMessages.push(`课程ID ${courseId}: ${err.message || '提交时发生网络错误'}`);
         console.error(`Error submitting course ${courseId}:`, err);
       }
     }
@@ -200,7 +207,7 @@ const submitCourses = async () => {
     if (allSubmittedSuccessfully) {
       ElMessage.success('所有选课提交成功！');
       selectedCourses.value = {};
-      fetchCourses(); // 重新加载课程列表以更新状态
+      fetchCourses(); 
     } else {
       ElMessageBox.alert(`部分课程选课失败或发生错误：<br/>${errorMessages.join('<br/>')}`, '提交结果', {
         dangerouslyUseHTMLString: true,
@@ -209,53 +216,52 @@ const submitCourses = async () => {
     }
 
   } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('选课提交操作失败');
+    if (error !== 'cancel' && error !== 'close') {
+      ElMessage.error(error.message || '选课提交操作失败');
       console.error('Error in submitCourses process:', error);
     }
   } finally {
     submitting.value = false;
   }
 };
-
 </script>
 
 <style scoped>
+/* 在现有样式基础上添加 */
+.id-input-form {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
 .choose-course {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
-
 .container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 20px; /* */
 }
-
 .form-card {
-  width: 95%; /* 稍微调整宽度 */
-  margin: 0 auto 20px auto; /* 保持居中和底部边距 */
+  width: 95%;
+  margin: 0 auto 20px auto; /* */
 }
-
 .card-header {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-
 .search-bar {
   display: flex;
-  flex-wrap: wrap; /* 允许换行 */
+  flex-wrap: wrap; /* */
   gap: 10px;
   margin-bottom: 20px;
-  align-items: center; /* 垂直居中对齐 */
+  align-items: center;
 }
-
 .search-input {
-  width: 180px; /* 可以根据需要调整 */
+  width: 180px; /* */
 }
-
 .submit-area {
   margin-top: 20px;
   display: flex;
