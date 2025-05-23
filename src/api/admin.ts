@@ -240,7 +240,7 @@ export const getSuppApplications = async (params: GetSuppApplicationsRequest): P
 // 处理补选申请
 export const processSupplementary = async (params: ProcessSuppRequest): Promise<ProcessSuppResponse> => {
   try {
-    const axiosresponse = await api.post('/course_selection/manager/process_supplement', params);
+    const axiosresponse = await api.post('/course_selection/manager/submit_supplement', params);
     return axiosresponse.data;
   } catch (error) {
     handleError(error);

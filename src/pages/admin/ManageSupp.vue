@@ -106,8 +106,7 @@ const fetchSupplementaryApplications = async () => {
         course_name: item.course_name,
         result: null
       }));
-      console.log('补选申请列表aplications.value:', applications.value);
-      console.log('补选申请列表:response.data.supplement_list', response);
+      
       totalApplications.value = applications.value.length;
 
       if (applications.value.length > 0) {
@@ -156,6 +155,8 @@ const handleApprove = async (application) => {
       result: true
     });
 
+    console.log('处理补选申请返回:', response);
+
     if (response.code === '200') {
       // 更新本地数据
       const index = applications.value.findIndex(item => item.supplement_id === application.supplement_id);
@@ -191,6 +192,8 @@ const handleReject = async (application) => {
       supplement_id: application.supplement_id,
       result: false
     });
+
+    console.log('处理补选申请返回:', response);
 
     if (response.code === '200') {
       // 更新本地数据

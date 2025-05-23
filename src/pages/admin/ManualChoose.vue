@@ -130,12 +130,12 @@ const searchStudentCourses = async () => {
       await fetchAvailableCourses();
       ElMessage.success('获取可选课程成功');
     } catch (error) {
-      console.error('获取可选课程失败:', error);
+      //console.error('获取可选课程失败:', error);
       ElMessage.error('获取可选课程失败');
     }
   } catch (error) {
     ElMessage.error('获取学生信息失败');
-    console.error(error);
+    //console.error(error);
     studentInfo.value = null;
   } finally {
     loading.value = false;
@@ -170,7 +170,6 @@ const fetchAvailableCourses = async () => {
     }
   } catch (error) {
     ElMessage.error('获取可选课程失败');
-    console.error(error);
   } finally {
     courseLoading.value = false;
   }

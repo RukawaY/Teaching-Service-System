@@ -136,7 +136,7 @@ const handleRowAction = async (row) => {
         return;
       }
     } catch (error) {
-      console.error('保存设置出错:', error);
+      //console.error('保存设置出错:', error);
       ElMessage.error('保存设置失败');
 
       // 保持编辑状态
@@ -197,7 +197,7 @@ const fetchTimeSettings = async () => {
       ElMessage.warning(response.message || '获取系统设置失败');
     }
   } catch (error) {
-    console.error('获取系统设置出错:', error);
+    //console.error('获取系统设置出错:', error);
     ElMessage.error('获取系统设置失败');
   } finally {
     loading.value = false;

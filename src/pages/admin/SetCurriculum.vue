@@ -259,10 +259,10 @@ const queryCurriculum = async () => {
     if (curriculumResponse.code === '200' && coursesResponse.code === '200') {
       // 更新培养方案数据
       formData.sections = curriculumResponse.data.sections;
-      console.log('培养方案sections数据:', formData.sections);
+      //console.log('培养方案sections数据:', formData.sections);
       // 更新所有课程数据
       allCourses.value = coursesResponse.data.course_list;
-      console.log('所有课程数据:', allCourses.value);
+      //console.log('所有课程数据:', allCourses.value);
 
       /*allCourses.value的结构
       [{
@@ -289,7 +289,7 @@ const queryCurriculum = async () => {
       ElMessage.error(`获取数据失败: ${errorMsg}`);
     }
   } catch (error) {
-    console.error('查询失败:', error);
+    //console.error('查询失败:', error);
     ElMessage.error('查询培养方案失败: ' + (error.message || '未知错误'));
   } finally {
     loading.value = false;
@@ -482,7 +482,7 @@ const saveCurriculum = async () => {
       ElMessage.error(`保存失败: ${response.message}`);
     }
   } catch (error) {
-    console.error('保存失败:', error);
+    //console.error('保存失败:', error);
     ElMessage.error('保存培养方案失败: ' + (error.message || '未知错误'));
   } finally {
     saving.value = false;
