@@ -58,37 +58,7 @@ const formData = reactive({
 
 const loading = ref(false);
 // 添加一些测试数据
-const curriculumData = ref({
-  major_name: '计算机科学与技术',
-  sections: [
-    {
-      section_name: '必修课',
-      section_credit: 10,
-      course_list: [
-        {course_name: "高等数学", credit: 3},
-        {course_name: "线性代数", credit: 2},
-        {course_name: "概率论与数理统计", credit: 2},
-        {course_name: "离散数学", credit: 2},
-        {course_name: "数据结构", credit: 2},
-        {course_name: "操作系统", credit: 2},
-        {course_name: "计算机网络", credit: 2},
-        {course_name: "数据库系统", credit: 2},
-      ]
-    },
-    {
-      section_name: '选修课',
-      section_credit: 10,
-      course_list: [
-        {course_name: "人工智能", credit: 2},
-        {course_name: "软件工程", credit: 2},
-        {course_name: "计算机图形学", credit: 2},
-        {course_name: "计算机系统结构", credit: 2},
-        {course_name: "计算机系统安全", credit: 2},
-        {course_name: "计算机系统安全", credit: 2},   
-      ]
-    }
-  ]
-});
+const curriculumData = ref();
 const showEmpty = computed(() => !loading.value && !curriculumData.value);
 
 // 计算每个部分的总学分
@@ -116,6 +86,7 @@ const fetchPersonalCurriculum = async () => {
       ElMessage.success('获取个人培养方案成功');
     } else {
       ElMessage.error(response.message || '获取失败');
+      curriculumData.value = null;
     }
   } catch (error) {
     ElMessage.error('获取个人培养方案失败');
@@ -175,7 +146,7 @@ const fetchPersonalCurriculum = async () => {
 }
 
 .curriculum-card {
-  width: 85%;
+  width: 65%;
   margin: 0 auto;
 }
 </style>

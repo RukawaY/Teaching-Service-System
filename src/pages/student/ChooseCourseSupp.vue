@@ -11,8 +11,8 @@
         <el-form-item label="学生ID">
           <el-input v-model.number="formData.student_id" placeholder="请输入学生ID" type="number" />
         </el-form-item>
-        <el-form-item label="课程ID">
-          <el-input v-model.number="formData.course_id" placeholder="请输入课程ID" type="number" />
+        <el-form-item label="开课ID">
+          <el-input v-model.number="formData.section_id" placeholder="请输入开课ID" type="number" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="submitApplication" :loading="submitting">
@@ -33,7 +33,7 @@
       </template>
 
       <el-table v-if="applications.length > 0" :data="applications" style="width: 100%">
-        <el-table-column prop="course_id" label="课程ID" width="120" />
+        <el-table-column prop="section_id" label="开课ID" width="120" />
         <el-table-column prop="course_name" label="课程名称" />
         <el-table-column prop="teacher_name" label="教师姓名" />
         <el-table-column prop="class_time" label="上课时间" />
@@ -60,77 +60,28 @@ import { chooseCourseSupp, getSuppResult, searchCourse } from '../../api/student
 
 const formData = reactive({
   student_id: '',
-  course_id: ''
+  section_id: ''
 });
 
 const submitting = ref(false);
 const refreshing = ref(false);
 // 添加一些示例数据
-const applications = ref([
-{
-    student_id: 1,
-    course_id: 1,
-    course_name: '高等数学',
-    teacher_name: '张三',
-    class_time: '1-2节',
-    classroom: 'A101',
-    credit: 2,
-    result: '待审核'
-},
-{
-    student_id: 1,
-    course_id: 2,
-    course_name: '线性代数',
-    teacher_name: '李四',
-    class_time: '3-4节',
-    classroom: 'B202',
-    credit: 2,
-    result: '补选成功'
-},
-{
-    student_id: 1,
-    course_id: 3,
-    course_name: '概率论',
-    teacher_name: '王五',
-    class_time: '5-6节',
-    classroom: 'C303',
-    credit: 2,
-    result: '补选失败'
-}
-]);
+const applications = ref([]);
 
 // 提交补选申请
 const submitApplication = async () => {
-  if (!formData.student_id || !formData.course_id) {
-    ElMessage.warning('请输入学生ID和课程ID');
+  if (!formData.student_id || !formData.section_id) {
+    ElMessage.warning('请输入学生ID和开课ID');
     return;
   }
 
   let course_info;
   submitting.value = true;
 
-  // 先检查课程是否存在
-  try {
-    course_info = await searchCourse({
-      course_id: formData.course_id
-    });
-
-    if (course_info.code != '200') {
-      ElMessage.error(course_info.message || '获取课程信息失败');
-      submitting.value = false;
-      return;
-    }
-  } catch (error) {
-    ElMessage.error('获取课程信息失败');
-    console.error(error);
-    submitting.value = false;
-    return;
-  }
-
   try {
     const params = {
       student_id: formData.student_id,
-      course_id: formData.course_id
+      section_id: formData.section_id
     };
     
     const response = await chooseCourseSupp(params);
@@ -138,17 +89,8 @@ const submitApplication = async () => {
     if (response.code === '200') {
       ElMessage.success('补选申请提交成功');
 
-        // 添加到申请列表
-      applications.value.unshift({
-        student_id: formData.student_id,
-        course_id: formData.course_id,
-        course_name: course_info.data.course_name,
-        teacher_name: course_info.data.course_list[0].teacher_name,
-        class_time: course_info.data.course_list[0].class_time,
-        classroom: course_info.data.course_list[0].classroom,
-        credit: course_info.data.course_list[0].credit,
-        result: '待审核'
-      });
+      // 自动刷新补选申请状态
+      await refreshApplications();
       
     } else {
       ElMessage.error(response.message || '提交失败');
@@ -163,8 +105,8 @@ const submitApplication = async () => {
 
 // 刷新补选申请状态
 const refreshApplications = async () => {
-  if (applications.value.length === 0) {
-    ElMessage.info('暂无申请记录可刷新');
+  if (!formData.student_id) {
+    ElMessage.warning('请输入学生ID');
     return;
   }
 
@@ -173,13 +115,26 @@ const refreshApplications = async () => {
     const response = await getSuppResult(formData.student_id);
     
     if (response.code === '200') {
-      // 遍历applications.value，根据response.data.result_list中的course_id，更新applications.value中的result
-      for (let i = 0; i < applications.value.length; i++) {
-        const app = applications.value[i];
-        const result = response.data.result_list.find(item => item.course_id === app.course_id);
-        if (result) {
-          applications.value[i].result = result.result;
-        }
+      // 先清空applications.value
+      applications.value = [];
+
+      for (let i = 0; i < response.data.result_list.length; i++) {
+        // 先添加到applications.value中
+        applications.value.push({
+          student_id: formData.student_id,
+          section_id: response.data.result_list[i].course_id,
+          course_name: response.data.result_list[i].course_name,
+          teacher_name: response.data.result_list[i].teacher_name,
+          class_time: response.data.result_list[i].class_time,
+          classroom: response.data.result_list[i].classroom,
+          credit: response.data.result_list[i].credit,
+          result: reflectResult(response.data.result_list[i].result)
+        });
+      }
+
+      if (applications.value.length === 0) {
+        ElMessage.info('暂无申请记录可刷新');
+        return;
       }
 
       ElMessage.success('刷新补选状态成功');
@@ -193,6 +148,19 @@ const refreshApplications = async () => {
     refreshing.value = false;
   }
 };
+
+const reflectResult = (result) => {
+  switch (result) {
+    case '0':
+      return '待审核';
+    case '1':
+      return '补选成功';
+    case '2':
+      return '补选失败';
+    default:
+      return '未知';
+  }
+}
 
 // 获取状态对应的标签类型
 const getStatusType = (status) => {
