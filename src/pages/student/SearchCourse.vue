@@ -38,7 +38,7 @@
       </template>
 
       <el-table :data="courseList" style="font-size: 15px;">
-        <el-table-column prop="course_id" label="开课ID" width="90" />
+        <el-table-column prop="course_id" label="课程ID" width="90" />
         <el-table-column prop="course_name" label="课程名称" />
         <el-table-column prop="teacher_name" label="授课教师" />
         <el-table-column prop="credit" label="学分" width="80" />
@@ -75,7 +75,7 @@
       <div v-if="selectedCourse" class="course-details">
         <h3>{{ selectedCourse.course_name }}</h3>
         <el-descriptions :column="3">
-          <el-descriptions-item label="开课 ID">{{ selectedCourse.course_id }}</el-descriptions-item>
+          <el-descriptions-item label="课程 ID">{{ selectedCourse.course_id }}</el-descriptions-item>
           <el-descriptions-item label="授课教师">{{ selectedCourse.teacher_name }}</el-descriptions-item>
           <el-descriptions-item label="课程学分">{{ selectedCourse.credit }}</el-descriptions-item>
           <el-descriptions-item label="上课时间">{{ selectedCourse.class_time }}</el-descriptions-item>
