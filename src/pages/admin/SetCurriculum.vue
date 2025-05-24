@@ -161,7 +161,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { adminAPI, searchCourse } from '../../api/admin';
+import { adminAPI, getCourseTable, searchCourse } from '../../api/admin';
 import { all } from 'axios';
 
 // 表单校验规则
@@ -254,7 +254,7 @@ const queryCurriculum = async () => {
     // 获取专业培养方案
     const curriculumResponse = await adminAPI.getCurriculum(formData.major_name);
 
-    const coursesResponse = await searchCourse({need_available: true});
+    const coursesResponse = await getCourseTable();
 
     if (curriculumResponse.code === '200' && coursesResponse.code === '200') {
       // 更新培养方案数据

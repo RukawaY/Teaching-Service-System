@@ -135,6 +135,24 @@ interface CurriculumResponse {
   }
 }
 
+interface CourseTableItem {
+  course_id: number;
+  course_name: string;
+  course_description: string;
+  credit: number;
+  category: string;
+}
+
+interface CourseTableResponse {
+  code: string;
+  message: string;
+  data: {
+    course_list: CourseTableItem[];
+  };
+}
+
+
+
 // 课程搜索接口类型
 interface SearchCourseRequest {
   course_name?: string;
@@ -283,7 +301,17 @@ export const searchCourse = async (params: SearchCourseRequest): Promise<SearchC
   }
 };
 
-
+export const getCourseTable = async (params: { course_id: number ,course_name: string ,category: string }): Promise<CourseTableResponse> => {
+  try {
+    const axiosresponse = await api.get(`/course_selection/search_course_table`, {
+      params
+    });
+    return axiosresponse.data;
+  } catch (error) {
+    handleError(error);
+    throw error;
+  }
+};
 
 // 管理员端API
 export const adminAPI = {
@@ -295,5 +323,6 @@ export const adminAPI = {
   processSupplementary,
   getCurriculum,
   setCurriculum,
+  getCourseTable,
   searchCourse,
 };
