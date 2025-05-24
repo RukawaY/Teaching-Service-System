@@ -71,9 +71,7 @@
 <script setup>
 import { ref, computed, reactive } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { getStudentCourses, adminChooseCourseForStudent } from '../../api/admin';
-//import { searchCourse } from '../../api/student';  // 从student.ts导入searchCourse函数
-import { searchCourseMock } from '../../api/admin'; // 从admin.ts导入searchCourse函数
+import { getStudentCourses, adminChooseCourseForStudent, searchCourse } from '../../api/admin';
 
 const formData = reactive({
   studentId: '',
@@ -88,7 +86,7 @@ const courseLoading = ref(false);
 
 // 检查时间冲突
 const isTimeConflict = (course) => {
-  return selectedCourses.value.some(selected =>
+  return selectedCourses.value && selectedCourses.value.length > 0 && selectedCourses.value.some(selected =>
     selected.class_time === course.class_time
   );
 };
@@ -99,6 +97,13 @@ const searchStudentCourses = async () => {
     ElMessage.warning('请输入学生ID');
     return;
   }
+  else
+  {
+    studentInfo.value = {
+      studentId: formData.studentId,
+      name: ''
+    }
+  }
 
   try {
     loading.value = true;
@@ -107,26 +112,30 @@ const searchStudentCourses = async () => {
     const response = await getStudentCourses(formData.studentId);
 
     if (response.code === '200') {
-      // 设置学生信息
-      studentInfo.value = {
-        id: formData.studentId,
-        name: response.data.student_name,
-      };
+      // 更新学生姓名
+      studentInfo.value.name = response.data.student_name;
 
-      // 设置已选课程
-      selectedCourses.value = response.data.course_list;
-
-      // 获取可选课程
-      await fetchAvailableCourses();
-
-      ElMessage.success('获取学生信息成功');
+      // 设置已选课程，确保不是null
+      selectedCourses.value = response.data.course_list || [];
+      
+      ElMessage.success('获取学生选课信息成功');
     } else {
-      ElMessage.error(response.message || '获取学生信息失败');
-      studentInfo.value = null;
+      ElMessage.error(response.message || '获取学生选课信息失败');
+      // 设置为空数组，而不是包含空对象的数组
+      selectedCourses.value = [];
+    }
+    
+    // 无论如何都尝试获取可选课程
+    try {
+      await fetchAvailableCourses();
+      ElMessage.success('获取可选课程成功');
+    } catch (error) {
+      //console.error('获取可选课程失败:', error);
+      ElMessage.error('获取可选课程失败');
     }
   } catch (error) {
     ElMessage.error('获取学生信息失败');
-    console.error(error);
+    //console.error(error);
     studentInfo.value = null;
   } finally {
     loading.value = false;
@@ -141,25 +150,26 @@ const fetchAvailableCourses = async () => {
     courseLoading.value = true;
 
     // 使用 searchCourse API 获取可选课程列表
-    const response = await searchCourseMock({
+    const response = await searchCourse({
       need_available: true
-    }); //!!!!!!!!!正常应该是用student.ts的searchCourse函数，现在是测试所以弄了个Mock版本
-    // const response = await searchCourse({
-    //   need_available: true
-    // });
+    });
 
     if (response.code === '200') {
-      // 过滤掉学生已选的课程
-      const selectedIds = selectedCourses.value.map(c => c.course_id);
-      availableCourses.value = response.data.course_list.filter(
-        course => !selectedIds.includes(course.course_id)
-      );
+      // 确保 selectedCourses.value 不是 null，并安全地过滤掉学生已选的课程
+      if (!selectedCourses.value || selectedCourses.value.length === 0) { 
+        availableCourses.value = response.data.course_list;
+      } 
+      else{
+        const selectedIds = selectedCourses.value.map(c => c.course_id);
+        availableCourses.value = response.data.course_list.filter(
+          course => !selectedIds.includes(course.course_id)
+        );
+      }
     } else {
       ElMessage.warning(response.message || '获取可选课程失败');
     }
   } catch (error) {
     ElMessage.error('获取可选课程失败');
-    console.error(error);
   } finally {
     courseLoading.value = false;
   }

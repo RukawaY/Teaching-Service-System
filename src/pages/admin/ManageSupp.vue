@@ -33,9 +33,7 @@
 
       <el-table :data="applications" style="width: 100%">
         <el-table-column prop="supplement_id" label="申请ID" width="90" />
-        <el-table-column prop="student_id" label="学生ID" width="90" />
         <el-table-column prop="student_name" label="学生姓名" />
-        <el-table-column prop="course_id" label="课程ID" width="90" />
         <el-table-column prop="course_name" label="课程名称" />
         <el-table-column label="审核结果" width="120">
           <template #default="scope">
@@ -101,7 +99,14 @@ const fetchSupplementaryApplications = async () => {
     const response = await getSuppApplications(params);
 
     if (response.code === '200') {
-      applications.value = response.data.supplement_list;
+      // 确保applications对象具有正确的属性，即使API返回的数据结构不同
+      applications.value = response.data.supplement_list.map(item => ({
+        supplement_id: item.supplement_id,
+        student_name: item.student_name,
+        course_name: item.course_name,
+        result: null
+      }));
+      
       totalApplications.value = applications.value.length;
 
       if (applications.value.length > 0) {
@@ -136,7 +141,7 @@ const handlePageChange = (page) => {
 const handleApprove = async (application) => {
   try {
     await ElMessageBox.confirm(
-      `确定通过ID为 ${application.supplement_id} 的补选申请吗？`,
+      `确定通过该补选申请吗？学生: ${application.student_name}, 课程: ${application.course_name}`,
       '确认操作',
       {
         confirmButtonText: '确定',
@@ -149,6 +154,8 @@ const handleApprove = async (application) => {
       supplement_id: application.supplement_id,
       result: true
     });
+
+    console.log('处理补选申请返回:', response);
 
     if (response.code === '200') {
       // 更新本地数据
@@ -172,7 +179,7 @@ const handleApprove = async (application) => {
 const handleReject = async (application) => {
   try {
     await ElMessageBox.confirm(
-      `确定拒绝ID为 ${application.supplement_id} 的补选申请吗？`,
+      `确定拒绝该补选申请吗？学生: ${application.student_name}, 课程: ${application.course_name}`,
       '确认操作',
       {
         confirmButtonText: '确定',
@@ -185,6 +192,8 @@ const handleReject = async (application) => {
       supplement_id: application.supplement_id,
       result: false
     });
+
+    console.log('处理补选申请返回:', response);
 
     if (response.code === '200') {
       // 更新本地数据
