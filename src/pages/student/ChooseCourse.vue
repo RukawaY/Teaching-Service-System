@@ -12,18 +12,20 @@
         <el-form-item label="学生ID:">
           <el-input
             v-model.number="studentId"
-            placeholder="请输入学生ID"
+            placeholder="输入ID后按Enter或点按钮"
             type="number"
             style="width: 200px; margin-right: 10px;"
-            @keyup.enter="studentIdEntered"
-          />
-           <el-button @click="studentIdEntered">确认ID (用于提交)</el-button>
+            @keyup.enter="handleStudentIdConfirm" />
+           <el-button @click="handleStudentIdConfirm" :loading="loading && studentIdJustConfirmed">
+            确认ID并加载方案课程
+           </el-button>
         </el-form-item>
       </el-form>
+
       <div class="search-bar">
         <el-input
           v-model="searchQuery.course_name"
-          placeholder="课程名称"
+          placeholder="课程名称 (可筛选方案内课程)"
           clearable
           class="search-input"
         />
@@ -34,20 +36,21 @@
           class="search-input"
         />
         <el-input
-          v-model="searchQuery.course_id"
-          placeholder="课程ID"
+          v-model="searchQuery.course_id" 
+          placeholder="课程ID (用于搜索)"
           clearable
           class="search-input"
         />
         <el-checkbox v-model="searchQuery.need_available">
           仅显示有余量课程
         </el-checkbox>
-        <el-button type="primary" @click="handleSearch" :loading="loading">搜索</el-button>
+        <el-button type="primary" @click="handleSearch" :loading="loading && !studentIdJustConfirmed">搜索</el-button>
         <el-button @click="resetSearch" :disabled="loading">重置</el-button>
       </div>
 
       <el-table :data="courseList" style="font-size: 15px;" v-loading="loading">
-        <el-table-column prop="course_id" label="课程ID" width="90" />
+        <el-table-column prop="course_id" label="课程ID (通用)" width="120" /> 
+        <el-table-column prop="section_id" label="教学班ID (选课用)" width="150" />
         <el-table-column prop="course_name" label="课程名称" />
         <el-table-column prop="teacher_name" label="授课教师" />
         <el-table-column prop="credit" label="学分" width="80" />
@@ -61,8 +64,7 @@
         <el-table-column label="选择" width="120">
           <template #default="scope">
             <el-checkbox
-              v-model="selectedCourses[scope.row.course_id]"
-              :disabled="scope.row.available_capacity <= 0"
+              v-model="selectedCourses[scope.row.section_id]" :disabled="scope.row.available_capacity <= 0"
             />
           </template>
         </el-table-column>
@@ -80,7 +82,7 @@
       </div>
     </el-card>
 
-    <el-empty v-if="showEmpty" description="暂无可选课程或未搜索到结果" />
+    <el-empty v-if="showEmpty" description="暂无可选课程或未搜索到结果（请确认学生ID是否正确或培养方案中是否有课程）" />
   </div>
 </template>
 
@@ -90,27 +92,30 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { searchCourse, submitStudentCourseSelection } from '../../api/student.ts';
 
 const courseList = ref([]);
-const selectedCourses = ref({});
+const selectedCourses = ref({}); // This will now be keyed by section_id
 const submitting = ref(false);
 const loading = ref(false);
+const studentIdJustConfirmed = ref(false);
 
 const searchQuery = ref({
   course_name: '',
   teacher_name: '',
-  course_id: '',
+  course_id: '', // This refers to the general course_id for searching
   need_available: false,
 });
 
-// 将 studentId 初始化为空字符串，以便输入框显示 placeholder
-const studentId = ref(''); // 修改点：不再写死，改为空字符串或 null
+const studentId = ref('');
 
-// 提醒用户输入ID的函数
-const studentIdEntered = () => {
+const handleStudentIdConfirm = async () => {
   if (!studentId.value) {
-    ElMessage.info('请输入学生ID以便进行选课提交。');
-  } else {
-    ElMessage.success(`学生ID已确认为: ${studentId.value}。现在可以进行选课提交。`);
+    ElMessage.info('请输入学生ID。');
+    courseList.value = [];
+    return;
   }
+  ElMessage.success(`学生ID已确认为: ${studentId.value}。正在加载其培养方案中的可选课程...`);
+  studentIdJustConfirmed.value = true;
+  await fetchCourses();
+  studentIdJustConfirmed.value = false;
 };
 
 const fetchCourses = async () => {
@@ -119,16 +124,20 @@ const fetchCourses = async () => {
     const paramsToApi = {};
     if (searchQuery.value.course_name) paramsToApi.course_name = searchQuery.value.course_name;
     if (searchQuery.value.teacher_name) paramsToApi.teacher_name = searchQuery.value.teacher_name;
+    // searchQuery.course_id is the general course_id for filtering in the search
     if (searchQuery.value.course_id) paramsToApi.course_id = Number(searchQuery.value.course_id);
     if (searchQuery.value.need_available) paramsToApi.need_available = searchQuery.value.need_available;
-    
-    // 选课页面的课程搜索API通常不需要student_id，除非API支持根据学生培养方案过滤可选课程
-    // 如果你的 searchCourse API 需要 student_id, 在这里添加:
-    // if (studentId.value) paramsToApi.student_id = Number(studentId.value);
+
+    if (studentId.value) {
+      paramsToApi.student_id = Number(studentId.value);
+    }
 
     const response = await searchCourse(paramsToApi);
     if (response && response.code === '200' && response.data && response.data.course_list) {
       courseList.value = response.data.course_list;
+      if (studentId.value && response.data.course_list.length === 0) {
+        ElMessage.info('该学生的培养方案中未找到符合当前搜索条件的课程，或培养方案为空。');
+      }
     } else {
       ElMessage.error(response.message || '获取课程列表失败');
       courseList.value = [];
@@ -166,7 +175,7 @@ const canSubmit = computed(() => {
 });
 
 const submitCourses = async () => {
-  if (!studentId.value) { // 修改点：检查 studentId 是否已输入
+  if (!studentId.value) {
     ElMessage.error('请先输入并确认学生ID再提交选课！');
     return;
   }
@@ -184,29 +193,37 @@ const submitCourses = async () => {
     submitting.value = true;
     let allSubmittedSuccessfully = true;
     let errorMessages = [];
-    const selectedCourseIds = Object.keys(selectedCourses.value).filter(
-      (courseId) => selectedCourses.value[courseId]
+    
+    // Iterate over selected section_ids
+    const selectedSectionIds = Object.keys(selectedCourses.value).filter(
+      (sectionId) => selectedCourses.value[sectionId]
     );
-    for (const courseId of selectedCourseIds) {
+
+    for (const sectionId of selectedSectionIds) { // MODIFIED: Iterate over sectionId
       try {
         const response = await submitStudentCourseSelection({
-          student_id: Number(studentId.value), // 修改点：使用 ref 的 value
-          course_id: Number(courseId),
+          student_id: Number(studentId.value),
+          course_id: Number(sectionId), // MODIFIED: Send section_id as 'course_id' to the API
         });
         if (response && response.code !== '200' && response.code !== 'success') {
           allSubmittedSuccessfully = false;
-          errorMessages.push(`课程ID ${courseId}: ${response.message || '选课失败'}`);
+          // Find the course name for better error messaging if possible, or just use sectionId
+          const courseWithError = courseList.value.find(c => c.section_id === Number(sectionId));
+          const courseNameForError = courseWithError ? courseWithError.course_name : `教学班ID ${sectionId}`;
+          errorMessages.push(`${courseNameForError} (ID ${sectionId}): ${response.message || '选课失败'}`);
         }
       } catch (err) {
         allSubmittedSuccessfully = false;
-        errorMessages.push(`课程ID ${courseId}: ${err.message || '提交时发生网络错误'}`);
-        console.error(`Error submitting course ${courseId}:`, err);
+        const courseWithError = courseList.value.find(c => c.section_id === Number(sectionId));
+        const courseNameForError = courseWithError ? courseWithError.course_name : `教学班ID ${sectionId}`;
+        errorMessages.push(`${courseNameForError} (ID ${sectionId}): ${err.message || '提交时发生网络错误'}`);
+        console.error(`Error submitting section ${sectionId}:`, err);
       }
     }
 
     if (allSubmittedSuccessfully) {
       ElMessage.success('所有选课提交成功！');
-      selectedCourses.value = {};
+      selectedCourses.value = {}; // Clear selections
       fetchCourses(); 
     } else {
       ElMessageBox.alert(`部分课程选课失败或发生错误：<br/>${errorMessages.join('<br/>')}`, '提交结果', {
@@ -227,7 +244,6 @@ const submitCourses = async () => {
 </script>
 
 <style scoped>
-/* 在现有样式基础上添加 */
 .id-input-form {
   margin-bottom: 20px;
   display: flex;
@@ -241,11 +257,11 @@ const submitCourses = async () => {
 .container {
   display: flex;
   flex-direction: column;
-  gap: 20px; /* */
+  gap: 20px; 
 }
 .form-card {
   width: 95%;
-  margin: 0 auto 20px auto; /* */
+  margin: 0 auto 20px auto;
 }
 .card-header {
   display: flex;
@@ -254,13 +270,13 @@ const submitCourses = async () => {
 }
 .search-bar {
   display: flex;
-  flex-wrap: wrap; /* */
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 20px;
   align-items: center;
 }
 .search-input {
-  width: 180px; /* */
+  width: 180px;
 }
 .submit-area {
   margin-top: 20px;
