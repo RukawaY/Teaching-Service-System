@@ -29,6 +29,7 @@
         </template>
 
         <el-table :data="selectedCourses" style="width: 100%">
+          <el-table-column prop="section_id" label="开课ID" width="90" />
           <el-table-column prop="course_id" label="课程ID" width="90" />
           <el-table-column prop="course_name" label="课程名称" />
           <el-table-column prop="teacher_name" label="授课教师" />
@@ -46,6 +47,7 @@
         </template>
 
         <el-table :data="availableCourses" style="width: 100%">
+          <el-table-column prop="section_id" label="开课ID" width="90" />
           <el-table-column prop="course_id" label="课程ID" width="90" />
           <el-table-column prop="course_name" label="课程名称" />
           <el-table-column prop="teacher_name" label="授课教师" />
@@ -102,7 +104,7 @@ const searchStudentCourses = async () => {
     studentInfo.value = {
       studentId: formData.studentId,
       name: ''
-    }
+    };
   }
 
   try {
@@ -110,6 +112,8 @@ const searchStudentCourses = async () => {
 
     // 调用API获取学生信息和已选课程
     const response = await getStudentCourses(formData.studentId);
+
+    //console.log(response);
 
     if (response.code === '200') {
       // 更新学生姓名
@@ -154,15 +158,17 @@ const fetchAvailableCourses = async () => {
       need_available: true
     });
 
+    //console.log(response);
+
     if (response.code === '200') {
       // 确保 selectedCourses.value 不是 null，并安全地过滤掉学生已选的课程
       if (!selectedCourses.value || selectedCourses.value.length === 0) { 
         availableCourses.value = response.data.course_list;
       } 
       else{
-        const selectedIds = selectedCourses.value.map(c => c.course_id);
+        const selectedIds = selectedCourses.value.map(c => c.section_id);
         availableCourses.value = response.data.course_list.filter(
-          course => !selectedIds.includes(course.course_id)
+          course => !selectedIds.includes(course.section_id)
         );
       }
     } else {
@@ -177,10 +183,12 @@ const fetchAvailableCourses = async () => {
 
 // 选择课程
 const chooseCourse = async (course) => {
+  /*
   if (!studentInfo.value) {
     ElMessage.warning('请先查询学生信息');
     return;
   }
+  */
 
   // 检查时间冲突
   if (isTimeConflict(course)) {
@@ -200,18 +208,22 @@ const chooseCourse = async (course) => {
       }
     );
 
+    //console.log(course.section_id);
+    
     // 调用API进行选课操作
     const response = await adminChooseCourseForStudent({
       student_id: formData.studentId,
-      course_id: course.course_id
+      course_id: course.section_id
     });
+
+    //console.log(response);
 
     if (response.code === '200') {
       // 将课程添加到已选列表
       selectedCourses.value.push(course);
 
       // 从可选列表中移除
-      const index = availableCourses.value.findIndex(c => c.course_id === course.course_id);
+      const index = availableCourses.value.findIndex(c => c.section_id === course.section_id);
       if (index !== -1) {
         availableCourses.value.splice(index, 1);
       }

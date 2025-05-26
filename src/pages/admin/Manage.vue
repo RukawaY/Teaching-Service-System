@@ -112,16 +112,34 @@ const handleRowAction = async (row) => {
         const secondStartRow = tableData.value.find(r => r.key === 'second_start');
         const secondEndRow = tableData.value.find(r => r.key === 'second_end');
 
+        // 时间验证：确保开始时间 <= 结束时间
+        const firstStart = firstStartRow?.value instanceof Date ? firstStartRow.value : new Date();
+        const firstEnd = firstEndRow?.value instanceof Date ? firstEndRow.value : new Date();
+        const secondStart = secondStartRow?.value instanceof Date ? secondStartRow.value : new Date();
+        const secondEnd = secondEndRow?.value instanceof Date ? secondEndRow.value : new Date();
+
+        // 验证初选时间
+        if (firstStart > firstEnd) {
+          ElMessage.error('初选开始时间不能晚于初选结束时间');
+          return;
+        }
+
+        // 验证补选时间
+        if (secondStart > secondEnd) {
+          ElMessage.error('补选开始时间不能晚于补选结束时间');
+          return;
+        }
+
         // 设置初选时间
         requestData.first_time_list = [
-          firstStartRow?.value instanceof Date ? firstStartRow.value.toISOString() : new Date().toISOString(),
-          firstEndRow?.value instanceof Date ? firstEndRow.value.toISOString() : new Date().toISOString()
+          firstStart.toISOString(),
+          firstEnd.toISOString()
         ];
 
         // 设置补选时间
         requestData.second_time_list = [
-          secondStartRow?.value instanceof Date ? secondStartRow.value.toISOString() : new Date().toISOString(),
-          secondEndRow?.value instanceof Date ? secondEndRow.value.toISOString() : new Date().toISOString()
+          secondStart.toISOString(),
+          secondEnd.toISOString()
         ];
       }
 
