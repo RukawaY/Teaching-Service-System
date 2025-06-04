@@ -16,7 +16,9 @@
     "pinia": "^2.1.7",
     "ui": "^0.2.4",
     "vue": "^3.4.15",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.2.5",
+    "jspdf": "^2.5.1",
+    "html2canvas": "^1.4.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.2",
