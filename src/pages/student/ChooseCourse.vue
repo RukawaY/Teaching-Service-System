@@ -49,8 +49,8 @@
       </div>
 
       <el-table :data="courseList" style="font-size: 15px;" v-loading="loading">
-        <el-table-column prop="course_id" label="课程ID (通用)" width="120" /> 
-        <el-table-column prop="section_id" label="教学班ID (选课用)" width="150" />
+        <el-table-column prop="course_id" label="课程ID" width="80" /> 
+        <el-table-column prop="section_id" label="教学班ID" width="90" />
         <el-table-column prop="course_name" label="课程名称" />
         <el-table-column prop="teacher_name" label="授课教师" />
         <el-table-column prop="credit" label="学分" width="80" />
